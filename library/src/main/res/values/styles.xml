@@ -1,0 +1,11 @@
+<resources>
+
+    <style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar"/>
+    
+    <style name="toolbarButtonStyle" parent="@style/Widget.AppCompat.Toolbar.Button.Navigation">
+        <item name="android:minWidth">@dimen/title_height</item>
+        <item name="android:scaleType">center</item>
+    </style>
+    
+    <dimen name="title_height">48dp</dimen>
+</resources>
