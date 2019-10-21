@@ -3,14 +3,15 @@ apply plugin: 'com.novoda.bintray-release'
 def user = ''
 def apiKey = ''
 Properties properties = new Properties()
-if (project.rootProject.findProject('local.properties') != null){
-    properties.load(project.rootProject.file('local.properties').newDataInputStream())
+File file = rootProject.file('local.properties')
+if (file.exists()){
+    properties.load(file.newDataInputStream())
     user = properties.getProperty("bintray.user")
     apiKey = properties.getProperty("bintray.apikey")
 }
 
 publish {
-    repoName = 'xLib'
+    repoName = 'Android'
     userOrg = 'funtc'
     groupId = 'com.funtc.xlib'    
     artifactId = 'xLib'
@@ -20,7 +21,7 @@ publish {
 
     bintrayUser = user
     bintrayKey = apiKey
-    dryRun = true
+    dryRun = false
     
 }
 
