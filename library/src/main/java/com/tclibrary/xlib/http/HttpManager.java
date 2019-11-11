@@ -89,7 +89,7 @@ public class HttpManager {
 
 	private Retrofit createRetrofit(final Class service){
 		if (mOkHttpClient == null) createOkHttpClient();
-		String serviceDomain = findBaseDomainBy(service);
+		String serviceDomain = findBaseUrlBy(service);
 		serviceDomain = StringUtils.isEmpty(serviceDomain) ? mDefaultDomain : serviceDomain;
 		Retrofit.Builder builder = new Retrofit.Builder()
 				.baseUrl(serviceDomain).client(mOkHttpClient);
@@ -105,10 +105,10 @@ public class HttpManager {
 		mOkHttpClient = builder.build();
 	}
 
-	private String findBaseDomainBy(Class clz){
+	private String findBaseUrlBy(Class clz){
 		String domain = "";
 		for (Field f : clz.getDeclaredFields()){
-			boolean hasBaseDomain = f.isAnnotationPresent(BaseDomain.class);
+			boolean hasBaseDomain = f.isAnnotationPresent(BaseURL.class);
 			if (hasBaseDomain){
 				try {
 					domain = (String) f.get(clz);
