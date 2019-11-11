@@ -5,7 +5,7 @@ import android.support.annotation.ColorInt;
 import android.support.annotation.DrawableRes;
 
 /**
- * Created by TianCheng on 2018/9/28.
+ * Created by FunTc on 2018/9/28.
  */
 public class ToolbarConfig {
 

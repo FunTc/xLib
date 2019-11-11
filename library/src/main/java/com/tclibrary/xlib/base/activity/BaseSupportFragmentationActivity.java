@@ -16,7 +16,7 @@ import com.tclibrary.xlib.plugin.PluginHelper;
 import me.yokeyword.fragmentation.SupportActivity;
 
 /**
- * Created by TianCheng on 2018/10/8.
+ * Created by FunTc on 2018/10/8.
  */
 public abstract class BaseSupportFragmentationActivity extends SupportActivity implements IBaseActivity{
 

@@ -16,7 +16,7 @@ import com.tclibrary.xlib.R;
 import com.tclibrary.xlib.base.ToolbarConfig;
 
 /**
- * Created by TianCheng on 2018/9/28.
+ * Created by FunTc on 2018/9/28.
  */
 class BaseActivityDelegate {
 	

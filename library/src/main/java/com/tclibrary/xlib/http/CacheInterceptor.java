@@ -12,7 +12,7 @@ import okhttp3.Request;
 import okhttp3.Response;
 
 /**
- * Created by TianCheng on 2018/10/30.
+ * Created by FunTc on 2018/10/30.
  */
 public class CacheInterceptor implements Interceptor {
 	

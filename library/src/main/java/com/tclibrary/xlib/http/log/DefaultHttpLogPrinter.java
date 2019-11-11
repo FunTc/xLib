@@ -7,7 +7,7 @@ import okhttp3.Request;
 import okhttp3.Response;
 
 /**
- * Created by TianCheng on 2018/10/31.
+ * Created by FunTc on 2018/10/31.
  */
 public class DefaultHttpLogPrinter implements IHttpLogPrinter {
 

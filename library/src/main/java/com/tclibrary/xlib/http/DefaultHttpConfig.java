@@ -17,7 +17,7 @@ import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
 import retrofit2.converter.gson.GsonConverterFactory;
 
 /**
- * Created by TianCheng on 2018/10/23.
+ * Created by FunTc on 2018/10/23.
  */
 public class DefaultHttpConfig implements IHttpConfig {
 	

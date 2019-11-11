@@ -18,7 +18,7 @@ import retrofit2.Call;
 import retrofit2.Response;
 
 /**
- * Created by TianCheng on 2018/11/2.
+ * Created by FunTc on 2018/11/2.
  * 
  * <p>最多可传递3个参数：
  * <pre>

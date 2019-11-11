@@ -12,7 +12,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 /**
- * Created by TianCheng on 2018/10/19.
+ * Created by FunTc on 2018/10/19.
  */
 public class AppManager {
 

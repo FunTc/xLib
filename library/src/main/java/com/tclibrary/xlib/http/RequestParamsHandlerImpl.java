@@ -6,7 +6,7 @@ import android.util.ArrayMap;
 import java.util.Map;
 
 /**
- * Created by TianCheng on 2018/10/30.
+ * Created by FunTc on 2018/10/30.
  */
 public class RequestParamsHandlerImpl implements IRequestParamsHandler {
 	

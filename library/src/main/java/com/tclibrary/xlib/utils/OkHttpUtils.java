@@ -13,7 +13,7 @@ import java.util.zip.Inflater;
 import okhttp3.MediaType;
 
 /**
- * Created by TianCheng on 2018/10/24.
+ * Created by FunTc on 2018/10/24.
  */
 public class OkHttpUtils {
 

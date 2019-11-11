@@ -15,7 +15,7 @@ import com.tclibrary.xlib.plugin.PluginHelper;
 import com.tclibrary.xlib.base.ToolbarConfig;
 
 /**
- * Created by TianCheng on 2018/7/27.
+ * Created by FunTc on 2018/7/27.
  */
 public abstract class BaseActivity extends AppCompatActivity implements IBaseActivity{
 	

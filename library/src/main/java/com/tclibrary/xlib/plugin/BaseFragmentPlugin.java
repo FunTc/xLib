@@ -8,7 +8,7 @@ import android.support.v4.app.Fragment;
 import android.view.View;
 
 /**
- * Created by TianCheng on 2018/11/5.
+ * Created by FunTc on 2018/11/5.
  */
 public abstract class BaseFragmentPlugin extends LifecyclePlugin {
 	

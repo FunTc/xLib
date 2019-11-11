@@ -1,7 +1,7 @@
 package com.tclibrary.xlib.eventbus;
 
 /**
- * Created by TianCheng on 2018/9/17.
+ * Created by FunTc on 2018/9/17.
  */
 public enum ThreadMode {
 	

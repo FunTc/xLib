@@ -9,7 +9,7 @@ import java.util.Collections;
 import java.util.Map;
 
 /**
- * Created by TianCheng on 2018/11/5.
+ * Created by FunTc on 2018/11/5.
  */
 public class PluginHelper {
 	

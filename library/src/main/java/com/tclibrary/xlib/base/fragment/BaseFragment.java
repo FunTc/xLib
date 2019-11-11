@@ -18,7 +18,7 @@ import com.tclibrary.xlib.plugin.PluginHelper;
 import me.yokeyword.fragmentation.SupportFragment;
 
 /**
- * Created by TianCheng on 2018/9/27.
+ * Created by FunTc on 2018/9/27.
  */
 public abstract class BaseFragment extends SupportFragment implements IBaseFragment{
 	

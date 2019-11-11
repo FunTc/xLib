@@ -21,7 +21,7 @@ import okhttp3.OkHttpClient;
 import retrofit2.Retrofit;
 
 /**
- * Created by TianCheng on 2018/10/24.
+ * Created by FunTc on 2018/10/24.
  */
 public class HttpManager {
 

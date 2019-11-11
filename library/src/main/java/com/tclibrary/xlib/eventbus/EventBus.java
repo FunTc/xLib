@@ -16,7 +16,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 /**
- * Created by TianCheng on 2018/8/30.
+ * Created by FunTc on 2018/8/30.
  */
 public class EventBus {
 	

@@ -21,7 +21,7 @@ import okhttp3.Response;
 import okio.Buffer;
 
 /**
- * Created by TianCheng on 2018/10/25.
+ * Created by FunTc on 2018/10/25.
  * 处理请求，添加公共参数
  */
 public class CommonParamsInterceptor implements Interceptor {

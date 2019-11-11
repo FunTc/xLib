@@ -5,7 +5,7 @@ import android.content.DialogInterface;
 import com.tclibrary.xlib.AppManager;
 
 /**
- * Created by TianCheng on 2018/10/29.
+ * Created by FunTc on 2018/10/29.
  */
 public class DefaultHttpProgressViewHolder implements IProgressView {
 

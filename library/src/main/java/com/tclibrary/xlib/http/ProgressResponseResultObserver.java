@@ -3,7 +3,7 @@ package com.tclibrary.xlib.http;
 import com.tclibrary.xlib.view.HttpProgressDialogHelper;
 
 /**
- * Created by TianCheng on 2018/10/29.
+ * Created by FunTc on 2018/10/29.
  */
 public abstract class ProgressResponseResultObserver<T extends IResponseResult> extends ResponseResultObserver<T> {
 

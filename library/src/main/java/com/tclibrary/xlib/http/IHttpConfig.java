@@ -6,7 +6,7 @@ import okhttp3.OkHttpClient;
 import retrofit2.Retrofit;
 
 /**
- * Created by TianCheng on 2018/10/23.
+ * Created by FunTc on 2018/10/23.
  */
 public interface IHttpConfig {
 

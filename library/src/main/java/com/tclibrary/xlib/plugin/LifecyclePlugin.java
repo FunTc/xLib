@@ -5,7 +5,7 @@ import android.arch.lifecycle.LifecycleObserver;
 import android.arch.lifecycle.OnLifecycleEvent;
 
 /**
- * Created by TianCheng on 2018/11/5.
+ * Created by FunTc on 2018/11/5.
  */
 public abstract class LifecyclePlugin implements IPlugin, LifecycleObserver {
 	

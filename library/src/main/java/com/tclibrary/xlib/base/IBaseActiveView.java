@@ -6,7 +6,7 @@ import android.view.View;
 import android.widget.TextView;
 
 /**
- * Created by TianCheng on 2018/10/18.
+ * Created by FunTc on 2018/10/18.
  */
 public interface IBaseActiveView {
 

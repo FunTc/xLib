@@ -1,7 +1,7 @@
 package com.tclibrary.xlib.http;
 
 /**
- * Created by TianCheng on 2018/10/26.
+ * Created by FunTc on 2018/10/26.
  * 
  */
 public interface IResponseResult {

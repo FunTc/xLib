@@ -1,7 +1,7 @@
 package com.tclibrary.xlib.eventbus;
 
 /**
- * Created by TianCheng on 2018/9/10.
+ * Created by FunTc on 2018/9/10.
  */
 public interface EventPoster {
 

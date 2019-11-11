@@ -19,7 +19,7 @@ import io.reactivex.disposables.Disposable;
 import retrofit2.HttpException;
 
 /**
- * Created by TianCheng on 2018/10/26.
+ * Created by FunTc on 2018/10/26.
  */
 public abstract class ResponseResultObserver<T extends IResponseResult> implements Observer<T> {
 

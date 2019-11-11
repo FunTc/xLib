@@ -1,7 +1,7 @@
 package com.tclibrary.xlib.http.processor;
 
 /**
- * Created by TianCheng on 2018/11/2.
+ * Created by FunTc on 2018/11/2.
  */
 public class RequestParams {
 
