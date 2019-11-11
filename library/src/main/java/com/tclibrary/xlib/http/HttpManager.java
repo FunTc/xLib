@@ -1,8 +1,8 @@
 package com.tclibrary.xlib.http;
 
 import android.support.annotation.NonNull;
+import android.text.TextUtils;
 
-import com.blankj.utilcode.util.StringUtils;
 import com.tclibrary.xlib.view.HttpProgressDialogHelper;
 
 import java.lang.reflect.Field;
@@ -35,7 +35,7 @@ public class HttpManager {
 
 	private Map<String, Object> mRetrofitServiceCache;
 
-	private String mDefaultDomain;
+	private String mDefaultURL;
 	private IHttpConfig mHttpConfig;
 	private OkHttpClient mOkHttpClient;
 	
@@ -45,24 +45,24 @@ public class HttpManager {
 
 	/**
 	 * 定义默认的全局BaseUrl，和网络配置
-	 * @param defaultDomain 全局BaseUrl
+	 * @param defaultURL 全局BaseUrl
 	 * @param httpConfig 配置
 	 */
-	public void init(String defaultDomain, @NonNull IHttpConfig httpConfig){
-		mDefaultDomain = defaultDomain;
+	public void init(String defaultURL, @NonNull IHttpConfig httpConfig){
+		mDefaultURL = defaultURL;
 		mHttpConfig = httpConfig;
 	}
 
-	public void init(String defaultDomain){
-		init(defaultDomain, new DefaultHttpConfig());
+	public void init(String defaultURL){
+		init(defaultURL, new DefaultHttpConfig());
 	}
 	
 	public void init(@NonNull IHttpConfig httpConfig){
 		init(null, httpConfig);
 	}
 
-	public void setDefaultDomain(String defaultDomain){
-		mDefaultDomain = defaultDomain;
+	public void setDefaultURL(String defaultURL){
+		mDefaultURL = defaultURL;
 	}
 	
 	public void setHttpConfig(@NonNull IHttpConfig httpConfig){
@@ -89,10 +89,10 @@ public class HttpManager {
 
 	private Retrofit createRetrofit(final Class service){
 		if (mOkHttpClient == null) createOkHttpClient();
-		String serviceDomain = findBaseUrlBy(service);
-		serviceDomain = StringUtils.isEmpty(serviceDomain) ? mDefaultDomain : serviceDomain;
+		String serviceURL = findBaseUrlBy(service);
+		serviceURL = TextUtils.isEmpty(serviceURL) ? mDefaultURL : serviceURL;
 		Retrofit.Builder builder = new Retrofit.Builder()
-				.baseUrl(serviceDomain).client(mOkHttpClient);
+				.baseUrl(serviceURL).client(mOkHttpClient);
 		IHttpConfig config = mHttpConfig == null ? new DefaultHttpConfig() : mHttpConfig;
 		config.onRetrofitConfig(builder);
 		return builder.build();
@@ -106,18 +106,18 @@ public class HttpManager {
 	}
 
 	private String findBaseUrlBy(Class clz){
-		String domain = "";
+		String url = "";
 		for (Field f : clz.getDeclaredFields()){
-			boolean hasBaseDomain = f.isAnnotationPresent(BaseURL.class);
-			if (hasBaseDomain){
+			boolean hasBaseURL = f.isAnnotationPresent(BaseURL.class);
+			if (hasBaseURL){
 				try {
-					domain = (String) f.get(clz);
+					url = (String) f.get(clz);
 				} catch (IllegalAccessException e) {
 					e.printStackTrace();
 				}
 			}
 		}
-		return domain;
+		return url;
 	}
 	
 	public OkHttpClient getOkHttpClient(){
