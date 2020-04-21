@@ -5,10 +5,10 @@ package com.tclibrary.xlib.eventbus;
  */
 public interface EventPoster {
 
-	EventPoster addParams(Object... params);
-	EventPoster processOn(ThreadMode threadMode);
-	EventPoster observeOn(ThreadMode threadMode);
+	EventPoster setValues(Object... values);
+	EventPoster delay(long delay);
 	void post();
-	void post(long delay);
+	void postTo(ThreadMode mode);
+	
 	
 }

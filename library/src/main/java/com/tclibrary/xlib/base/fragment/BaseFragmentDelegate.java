@@ -2,11 +2,6 @@ package com.tclibrary.xlib.base.fragment;
 
 import android.app.Activity;
 import android.graphics.Color;
-import android.support.v4.content.ContextCompat;
-import android.support.v4.view.ViewCompat;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.AppCompatImageView;
-import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
 import android.view.View;
 import android.widget.ImageView;
@@ -18,6 +13,11 @@ import com.tclibrary.xlib.base.ToolbarConfig;
 
 import java.util.NoSuchElementException;
 
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.AppCompatImageView;
+import androidx.appcompat.widget.Toolbar;
+import androidx.core.content.ContextCompat;
+import androidx.core.view.ViewCompat;
 import me.yokeyword.fragmentation.SupportFragment;
 
 /**

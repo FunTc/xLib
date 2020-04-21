@@ -1,8 +1,8 @@
 package com.tclibrary.xlib.http;
 
-import android.support.annotation.NonNull;
-
 import java.util.Map;
+
+import androidx.annotation.NonNull;
 
 /**
  * Created by FunTc on 2018/10/25.

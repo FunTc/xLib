@@ -1,9 +1,10 @@
 package com.tclibrary.xlib.http;
 
-import android.support.annotation.NonNull;
 import android.util.ArrayMap;
 
 import java.util.Map;
+
+import androidx.annotation.NonNull;
 
 /**
  * Created by FunTc on 2018/10/30.

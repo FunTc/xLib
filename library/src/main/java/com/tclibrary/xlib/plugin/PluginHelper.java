@@ -1,12 +1,12 @@
 package com.tclibrary.xlib.plugin;
 
-import android.support.annotation.NonNull;
-import android.support.v4.util.ArrayMap;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
+
+import androidx.annotation.NonNull;
+import androidx.collection.ArrayMap;
 
 /**
  * Created by FunTc on 2018/11/5.

@@ -1,14 +1,12 @@
 package com.tclibrary.xlib.http;
 
-import android.support.annotation.NonNull;
-import android.text.TextUtils;
-
 import com.tclibrary.xlib.view.HttpProgressDialogHelper;
 
 import java.lang.reflect.Field;
-import java.util.HashMap;
 import java.util.Map;
 
+import androidx.annotation.NonNull;
+import androidx.collection.ArrayMap;
 import io.reactivex.Observable;
 import io.reactivex.ObservableSource;
 import io.reactivex.ObservableTransformer;
@@ -34,13 +32,17 @@ public class HttpManager {
 	}
 
 	private Map<String, Object> mRetrofitServiceCache;
+	private Map<String, String> mServiceUrls;
 
 	private String mDefaultURL;
 	private IHttpConfig mHttpConfig;
 	private OkHttpClient mOkHttpClient;
 	
 
-	private HttpManager() { }
+	private HttpManager() {
+		mRetrofitServiceCache = new ArrayMap<>();
+		mServiceUrls = new ArrayMap<>();
+	}
 
 
 	/**
@@ -68,6 +70,16 @@ public class HttpManager {
 	public void setHttpConfig(@NonNull IHttpConfig httpConfig){
 		mHttpConfig = httpConfig;
 	}
+	
+	public <T> void setServiceURL(Class<T> serviceClz, String url) {
+		String key = serviceClz.getCanonicalName();
+		mServiceUrls.put(key, url);
+		Object service = mRetrofitServiceCache.get(key);
+		if (service != null) {
+			service = createRetrofit(serviceClz).create(serviceClz);
+			mRetrofitServiceCache.put(key, service);
+		}
+	}
 
 	/** 
 	 * 根据Api的接口类获得其retrofit处理后的实例
@@ -75,22 +87,25 @@ public class HttpManager {
 	 * @param <T> 接口类泛型
 	 * @return 接口类的实例
 	 */
-	public <T> T getRetrofitService(final Class<T> service){
-		if (mRetrofitServiceCache == null)
-			mRetrofitServiceCache = new HashMap<>();
-		@SuppressWarnings("unchecked")
-		T retrofitService = (T) mRetrofitServiceCache.get(service.getCanonicalName());
+	@SuppressWarnings("unchecked")
+	public <T> T getRetrofitService(final Class<T> service) {
+		Object retrofitService = mRetrofitServiceCache.get(service.getCanonicalName());
 		if (retrofitService == null){
 			retrofitService = createRetrofit(service).create(service);
 			mRetrofitServiceCache.put(service.getCanonicalName(), retrofitService);
 		}
-		return retrofitService;
+		return (T) retrofitService;
 	}
 
 	private Retrofit createRetrofit(final Class service){
 		if (mOkHttpClient == null) createOkHttpClient();
-		String serviceURL = findBaseUrlBy(service);
-		serviceURL = TextUtils.isEmpty(serviceURL) ? mDefaultURL : serviceURL;
+		String serviceURL = mServiceUrls.get(service.getCanonicalName());
+		if (serviceURL == null) {
+			serviceURL = findBaseUrlBy(service);
+		}
+		if (serviceURL == null) {
+			serviceURL = mDefaultURL;
+		}
 		Retrofit.Builder builder = new Retrofit.Builder()
 				.baseUrl(serviceURL).client(mOkHttpClient);
 		IHttpConfig config = mHttpConfig == null ? new DefaultHttpConfig() : mHttpConfig;
@@ -106,18 +121,17 @@ public class HttpManager {
 	}
 
 	private String findBaseUrlBy(Class clz){
-		String url = "";
 		for (Field f : clz.getDeclaredFields()){
 			boolean hasBaseURL = f.isAnnotationPresent(BaseURL.class);
 			if (hasBaseURL){
 				try {
-					url = (String) f.get(clz);
+					return (String) f.get(clz);
 				} catch (IllegalAccessException e) {
-					e.printStackTrace();
+					return null;
 				}
 			}
 		}
-		return url;
+		return null;
 	}
 	
 	public OkHttpClient getOkHttpClient(){

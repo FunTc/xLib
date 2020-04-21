@@ -1,10 +1,11 @@
 package com.tclibrary.xlib.eventbus;
 
-import android.support.annotation.NonNull;
 import android.text.TextUtils;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import androidx.annotation.NonNull;
 
 /**
  * Created by FunTc on 2018/8/31.
@@ -12,23 +13,16 @@ import java.util.List;
 public class Event {
 	
 	private String mEventTag;
-	private Object[] mParams;
-	private List<Object> mReturnParams;
-	private OnEventProcessor mEventProcessor;
-	private List<OnEventListener> mEventListeners;
+	private Object[] mValues;
+	private List<Object> mProcessedValues;
 	private Exception mException;
-	private boolean isRunning;
-	private ThreadMode mProcessThreadMode;
-	private ThreadMode mObserveThreadMode;
+	private boolean isPosting;
 	private boolean isSuccess;
-	
-	private List<OnEventListener> mEventListenersAddCache;
-	private List<OnEventListener> mEventListenersRemoveCache;
+	private boolean isCanceled;
 	
 	
 	Event(@NonNull String eventTag){
 		mEventTag = eventTag;
-		mEventListeners = new ArrayList<>();
 	}
 	
 	public String getEventTag(){
@@ -43,39 +37,39 @@ public class Event {
 		return eventTagIs(String.valueOf(eventTag));
 	}
 	
-	public void addReturnParam(Object param){
-		if (mReturnParams == null){
-			mReturnParams = new ArrayList<>();
+	public void addProcessedValue(Object value){
+		if (mProcessedValues == null){
+			mProcessedValues = new ArrayList<>();
 		}
-		mReturnParams.add(param);
+		mProcessedValues.add(value);
 	}
 	
-	public List<Object> getReturnParams(){
-		return mReturnParams;
+	public List<Object> getProcessedValues(){
+		return mProcessedValues;
 	}
 	
-	void setParams(Object... params){
-		mParams = params;
+	void setValues(Object... values){
+		mValues = values;
 	}
 	
-	public Object getParam(int index){
-		if (mParams != null && index < mParams.length){
-			return mParams[index];
+	public Object getValue(int index){
+		if (mValues != null && index < mValues.length){
+			return mValues[index];
 		}
 		return null;
 	}
 
-	public Object getReturnParams(int index) {
-		if (mReturnParams != null && index < mReturnParams.size()){
-			return mReturnParams.get(index);
+	public Object getProcessedValue(int index) {
+		if (mProcessedValues != null && index < mProcessedValues.size()){
+			return mProcessedValues.get(index);
 		}
 		return null;
 	}
 	
 	@SuppressWarnings("unchecked")
-	public <T> T findParam(Class<T> cls){
-		if(mParams != null){
-			for(Object obj : mParams){
+	public <T> T findValue(Class<T> cls){
+		if(mValues != null){
+			for(Object obj : mValues){
 				if(cls.isInstance(obj)){
 					return (T)obj;
 				}
@@ -85,21 +79,16 @@ public class Event {
 	}
 
 	@SuppressWarnings("unchecked")
-	public <T> T findParam(Class<T> cls, T defaultValue){
-		if(mParams != null){
-			for(Object obj : mParams){
-				if(cls.isInstance(obj)){
-					return (T)obj;
-				}
-			}
-		}
+	public <T> T findValue(Class<T> cls, T defaultValue){
+		T value = findValue(cls);
+		if (value != null) return value;
 		return defaultValue;
 	}
 
 	@SuppressWarnings("unchecked")
-	public <T> T findReturnParam(Class<T> cls){
-		if(mReturnParams != null){
-			for(Object obj : mReturnParams){
+	public <T> T findProcessedValue(Class<T> cls){
+		if(mProcessedValues != null){
+			for(Object obj : mProcessedValues){
 				if(cls.isInstance(obj)){
 					return (T)obj;
 				}
@@ -115,76 +104,7 @@ public class Event {
 	public boolean isSuccess() {
 		 return isSuccess;
 	}
-
-	void addEventListener(OnEventListener listener){
-		if (isRunning){
-			if (mEventListenersAddCache == null) mEventListenersAddCache = new ArrayList<>();
-			if (!mEventListenersAddCache.contains(listener)) mEventListenersAddCache.add(listener);
-		} else {
-			if (!mEventListeners.contains(listener))
-				mEventListeners.add(listener);
-		}
-	}
 	
-	void removeEventListener(OnEventListener listener){
-		if (isRunning){
-			if (mEventListenersRemoveCache == null) mEventListenersRemoveCache = new ArrayList<>();
-			if (!mEventListenersRemoveCache.contains(listener)) mEventListenersRemoveCache.add(listener);
-		} else {
-			mEventListeners.remove(listener);
-		}
-	}
-	
-	void setEventProcessor(OnEventProcessor processor){
-		mEventProcessor = processor;
-	}
-	
-	OnEventProcessor getEventProcessor(){
-		return mEventProcessor;
-	}
-	
-	List<OnEventListener> getEventListeners(){
-		return mEventListeners;
-	}
-	
-	private boolean isStopped = false;
-	
-	void executeEventProcessor(){
-		if (mEventProcessor == null || isRunning) return;
-		isRunning = true;
-		try {
-			mEventProcessor.onProcessEvent(this);
-		} catch (Exception e) {
-			setException(e);
-			e.printStackTrace();
-		}
-		isRunning = false;
-	}
-	
-	void callEventListeners(){
-		if (mEventListeners == null || mEventListeners.isEmpty()) return;
-		isRunning = true;
-		for (OnEventListener listener : mEventListeners){
-			if(isStopped){
-				isStopped = false;
-				break;
-			}
-			listener.onEventResult(this);
-		}
-		isRunning = false;
-		
-		if (mEventListenersAddCache != null && mEventListenersAddCache.size() > 0){
-			for (OnEventListener listener : mEventListenersAddCache){
-				listener.onEventResult(this);
-			}
-			mEventListeners.addAll(mEventListenersAddCache);
-			mEventListenersAddCache.clear();
-		}
-		if (mEventListenersRemoveCache != null && mEventListenersRemoveCache.size() > 0){
-			mEventListeners.removeAll(mEventListenersRemoveCache);
-			mEventListenersRemoveCache.clear();
-		}
-	}
 	
 	void setException(Exception e){
 		mException = e;
@@ -194,31 +114,29 @@ public class Event {
 		return mException;
 	}
 	
-	boolean isRunning(){
-		return isRunning;
-	}
-
-	/**
-	 * 设置是否终止运行
-	 */
-	void stopEvent(){
-		isStopped = true;
+	public boolean isPosting(){
+		return isPosting;
 	}
 	
-	void setProcessThreadMode(ThreadMode threadMode){
-		mProcessThreadMode = threadMode;
+	void setIsPosting(boolean isPosting) {
+		this.isPosting = isPosting;
 	}
 	
-	void setObserveThreadMode(ThreadMode threadMode){
-		mObserveThreadMode = threadMode;
+	public boolean isCanceled() {
+		return isCanceled;
 	}
 	
-	ThreadMode getProcessThreadMode(){
-		return mProcessThreadMode;
+	void init() {
+		this.isCanceled = false;
+		this.isPosting = false;
+		this.isSuccess = false;
+		if (mProcessedValues != null) {
+			mProcessedValues.clear();
+		}
 	}
 	
-	ThreadMode getObserveThreadMode(){
-		return mObserveThreadMode;
+	void cancel() {
+		isCanceled = true;
 	}
 	
 	@Override
@@ -238,6 +156,7 @@ public class Event {
 		return mEventTag.hashCode() + super.hashCode();
 	}
 
+	@NonNull
 	@Override
 	public String toString() {
 		StringBuilder builder = new StringBuilder();
@@ -245,20 +164,21 @@ public class Event {
 				.append("{")
 				.append("\"eventTag\"：").append(mEventTag).append(", ")
 				.append("\"params\"：[");
-		if (mParams != null){
-			for (int i = 0; i < mParams.length; i++){
-				builder.append(mParams[i]);
-				if (i < mParams.length - 1) builder.append(", ");
+		if (mValues != null){
+			for (int i = 0; i < mValues.length; i++){
+				builder.append(mValues[i]);
+				if (i < mValues.length - 1) builder.append(", ");
 			}
 		}
 		builder.append("], \"returnParams\"：[");
-		if (mReturnParams != null){
-			for (Object o : mReturnParams){
+		if (mProcessedValues != null){
+			for (Object o : mProcessedValues){
 				builder.append(o);
-				if (mReturnParams.indexOf(o) < mReturnParams.size() -1 ) builder.append(", ");
+				if (mProcessedValues.indexOf(o) < mProcessedValues.size() -1 ) builder.append(", ");
 			}	
 		} 
 		builder.append("]}");
 		return builder.toString();
 	}
+	
 }
