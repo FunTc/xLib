@@ -1,7 +1,5 @@
 package com.tclibrary.xlib.http;
 
-import android.support.annotation.NonNull;
-
 import com.tclibrary.xlib.BuildConfig;
 import com.tclibrary.xlib.XApplication;
 import com.tclibrary.xlib.http.log.DefaultHttpLogPrinter;
@@ -10,6 +8,7 @@ import com.tclibrary.xlib.http.log.HttpLoggerInterceptor;
 import java.io.File;
 import java.util.concurrent.TimeUnit;
 
+import androidx.annotation.NonNull;
 import okhttp3.Cache;
 import okhttp3.OkHttpClient;
 import retrofit2.Retrofit;

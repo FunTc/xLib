@@ -1,6 +1,5 @@
 package com.tclibrary.xlib.http.log;
 
-import android.support.annotation.NonNull;
 import android.text.TextUtils;
 
 import com.tclibrary.xlib.utils.OkHttpUtils;
@@ -12,6 +11,7 @@ import java.nio.charset.Charset;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
+import androidx.annotation.NonNull;
 import okhttp3.Interceptor;
 import okhttp3.MediaType;
 import okhttp3.Request;

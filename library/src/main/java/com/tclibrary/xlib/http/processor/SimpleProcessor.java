@@ -1,11 +1,7 @@
 package com.tclibrary.xlib.http.processor;
 
-import android.support.annotation.NonNull;
-import android.support.v4.util.ArrayMap;
-import android.support.v4.util.Pair;
-
 import com.tclibrary.xlib.eventbus.Event;
-import com.tclibrary.xlib.eventbus.OnEventProcessor;
+import com.tclibrary.xlib.eventbus.EventProcessor;
 import com.tclibrary.xlib.http.HttpManager;
 import com.tclibrary.xlib.view.HttpProgressDialogHelper;
 
@@ -14,6 +10,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import androidx.annotation.NonNull;
+import androidx.collection.ArrayMap;
+import androidx.core.util.Pair;
 import retrofit2.Call;
 import retrofit2.Response;
 
@@ -38,7 +37,7 @@ import retrofit2.Response;
  * 	例如：RequestParams.create(Pair.create("name", "admin"), Pair.create("psw", "123456"))
  * 	</pre>
  */
-public class SimpleProcessor implements OnEventProcessor {
+public class SimpleProcessor implements EventProcessor {
 	
 	private Class<?> mApiClass;
 	private String mMethodName;
@@ -50,18 +49,17 @@ public class SimpleProcessor implements OnEventProcessor {
 	public SimpleProcessor(@NonNull Class<?> apiClass, @NonNull String methodName){
 		mApiClass = apiClass;
 		mMethodName = methodName;
-		
 	}
 	
 	@Override
-	public void onProcessEvent(@NonNull Event event) throws Exception {
-		boolean isShowProgress = event.findParam(Boolean.class, true);
-		String progressMsg = event.findParam(String.class);
+	public void onProcess(@NonNull Event event) throws Exception {
+		boolean isShowProgress = event.findValue(Boolean.class, true);
+		String progressMsg = event.findValue(String.class);
 		if (isShowProgress){
 			HttpProgressDialogHelper.instance().show(progressMsg);
 		}
 		try {
-			RequestParams requestParams = event.findParam(RequestParams.class);
+			RequestParams requestParams = event.findValue(RequestParams.class);
 			Object api = HttpManager.instance().getRetrofitService(mApiClass);
 			Call call;
 			if (requestParams == null){
@@ -90,7 +88,7 @@ public class SimpleProcessor implements OnEventProcessor {
 			}
 			Response response = call.execute();
 			event.setIsSuccess(response.isSuccessful());
-			event.addReturnParam(response.body());
+			event.addProcessedValue(response.body());
 		} finally {
 			if (isShowProgress){
 				HttpProgressDialogHelper.instance().dismiss();

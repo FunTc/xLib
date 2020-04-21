@@ -2,7 +2,6 @@ package com.tclibrary.xlib.view;
 
 import android.app.Dialog;
 import android.content.Context;
-import android.support.annotation.NonNull;
 import android.text.TextUtils;
 import android.view.View;
 import android.view.Window;
@@ -10,6 +9,8 @@ import android.view.WindowManager;
 import android.widget.TextView;
 
 import com.tclibrary.xlib.R;
+
+import androidx.annotation.NonNull;
 
 /**
  * Created by FunTc on 2018/10/29.

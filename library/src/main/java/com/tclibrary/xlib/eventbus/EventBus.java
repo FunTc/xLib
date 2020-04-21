@@ -1,19 +1,21 @@
 package com.tclibrary.xlib.eventbus;
 
-import android.arch.lifecycle.Lifecycle;
-import android.arch.lifecycle.LifecycleObserver;
-import android.arch.lifecycle.LifecycleOwner;
-import android.arch.lifecycle.OnLifecycleEvent;
 import android.os.Handler;
 import android.os.Looper;
-import android.support.annotation.NonNull;
 
-import com.orhanobut.logger.Logger;
-
+import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+
+import androidx.annotation.NonNull;
+import androidx.collection.ArrayMap;
+import androidx.lifecycle.Lifecycle;
+import androidx.lifecycle.LifecycleObserver;
+import androidx.lifecycle.LifecycleOwner;
+import androidx.lifecycle.OnLifecycleEvent;
 
 /**
  * Created by FunTc on 2018/8/30.
@@ -30,61 +32,147 @@ public class EventBus {
 
 	private EventBus(){ }
 	
-	private EventDispatcher mEventDispatcher = new EventDispatcher();
-
 	private ConcurrentHashMap<String, Event> mTag2EventMap = new ConcurrentHashMap<>();
+	private ConcurrentHashMap<String, CopyOnWriteArrayList<EventListenerWrapper>> mTag2ListenersMap = new ConcurrentHashMap<>();
+	private ArrayMap<String, EventProcessor> mTag2ProcessorMap = new ArrayMap<>();
+
+	private ExecutorService mExecutorService = Executors.newCachedThreadPool();
+	private Handler mMainHandler = new Handler(Looper.getMainLooper());
 	
 	
+	private boolean isMainThread(){
+		return Looper.getMainLooper().getThread() == Thread.currentThread();
+	}
+	
+	private void processEvent(Event event, ThreadMode observerThreadMode) {
+		String tag = event.getEventTag();
+		EventProcessor processor = mTag2ProcessorMap.get(tag);
+		if (processor != null) {
+			if (processor.isAsync()) {
+				mExecutorService.execute(() -> processEventInternal(event, processor, observerThreadMode));
+			} else {
+				if (isMainThread()) {
+					processEventInternal(event, processor, observerThreadMode);
+				} else {
+					mMainHandler.post(() -> processEventInternal(event, processor, observerThreadMode));
+				}
+			}
+		} else {
+			dispatchEvent(event, observerThreadMode);
+		}
+	}
+	
+	private void processEventInternal(Event event, @NonNull EventProcessor processor, ThreadMode observerThreadMode) {
+		try {
+			processor.onProcess(event);
+			if (event.isCanceled()) {
+				event.setIsPosting(false);
+			} else {
+				dispatchEvent(event, observerThreadMode);
+			}
+		} catch (Exception e) {
+			event.setIsPosting(false);
+			event.setException(e);
+			e.printStackTrace();
+		}
+	}
+	
+	private void dispatchEvent(Event event, ThreadMode observerThreadMode) {
+		if (observerThreadMode == ThreadMode.MAIN) {
+			if (isMainThread()) {
+				dispatchEventInternal(event);
+			} else {
+				mMainHandler.post(() -> dispatchEventInternal(event));
+			}
+		} else {
+			if (isMainThread()) {
+				mExecutorService.execute(() -> dispatchEventInternal(event));
+			} else {
+				dispatchEventInternal(event);
+			}
+		}
+	}
+	
+	private void dispatchEventInternal(Event event) {
+		List<EventListenerWrapper> listenerWrappers = mTag2ListenersMap.get(event.getEventTag());
+		if (listenerWrappers == null || listenerWrappers.size() == 0) return;
+		for (EventListenerWrapper listenerWrapper : listenerWrappers) {
+			if (listenerWrapper.isJustNotifyInActive()) {
+				if (listenerWrapper.isActive()) {
+					listenerWrapper.getListener().onEventResult(event);
+				} 
+			} else {
+				listenerWrapper.getListener().onEventResult(event);
+			}
+		}
+		event.setIsPosting(false);
+	}
+
 	public void removeEvent(int eventTag){
 		removeEvent(String.valueOf(eventTag));
 	}
-	
+
 	public void removeEvent(@NonNull String eventTag){
 		mTag2EventMap.remove(eventTag);
+		mTag2ProcessorMap.remove(eventTag);
+		List<EventListenerWrapper> listeners = mTag2ListenersMap.remove(eventTag);
+		if (listeners != null) {
+			for (EventListenerWrapper listener : listeners) {
+				listener.release();
+			}
+			listeners.clear();
+		}
 	}
-	
+
 	public void removeEventListener(int eventTag, OnEventListener eventListener){
 		removeEventListener(String.valueOf(eventTag), eventListener);
 	}
-	
-	public void removeEventListener(@NonNull String eventTag, OnEventListener eventListener){
-		Event event = mTag2EventMap.get(eventTag);
-		if (event != null){
-			if (event.getEventListeners().size() > 1){
-				event.removeEventListener(eventListener);
+
+	public void removeEventListener(@NonNull String eventTag, OnEventListener listener){
+		List<EventListenerWrapper> listenerWrappers = mTag2ListenersMap.get(eventTag);
+		if (listenerWrappers != null){
+			EventListenerWrapper elw = null;
+			for (EventListenerWrapper listenerWrapper: listenerWrappers) {
+				if (listenerWrapper.getListener() == listener) {
+					elw = listenerWrapper;
+					break;
+				}
+			}
+			if (elw != null) {
+				elw.release();
+				listenerWrappers.remove(elw);
 			} else {
+				try {
+					throw new IllegalArgumentException("there is no EventListener[" + listener + "] registered for the Event");
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+			if (listenerWrappers.size() == 0) {
 				removeEvent(eventTag);
 			}
 		} else {
 			try {
-				throw new Exception("you didn't register an Event with eventTag as " + eventTag);
+				throw new IllegalArgumentException("you didn't register the EventListener[" + listener + "] for the Event with eventTag=" + eventTag);
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
 		}
 	}
-	
-	public void stopEvent(int eventTag){
-		stopEvent(String.valueOf(eventTag));
-	}
-	
-	public void stopEvent(@NonNull String eventTag){
-		if (mTag2EventMap.containsKey(eventTag)){
-			Event event = mTag2EventMap.get(eventTag);
-			if (event.isRunning()){
-				event.stopEvent();
-			} else {
-				Logger.w("The Event is not running !");
+
+	private void removeEventListener(@NonNull String eventTag, EventListenerWrapper listenerWrapper) {
+		List<EventListenerWrapper> listeners = mTag2ListenersMap.get(eventTag);
+		if (listeners != null) {
+			if (listeners.size() > 0) {
+				listenerWrapper.release();
+				listeners.remove(listenerWrapper);
 			}
-		} else {
-			try {
-				throw new Exception("you didn't register an Event with eventTag as " + eventTag);
-			} catch (Exception e) {
-				e.printStackTrace();
+			if (listeners.size() == 0) {
+				removeEvent(eventTag);
 			}
 		}
 	}
-	
+
 	@NonNull
 	public static EventRegister add(int eventTag){
 		return add(String.valueOf(eventTag));
@@ -95,18 +183,57 @@ public class EventBus {
 		return new RegisterImpl(eventTag);
 	}
 
+	public static Event get(int eventTag){
+		return get(String.valueOf(eventTag));
+	}
+
+	public static Event get(@NonNull String eventTag){
+		if (instance().mTag2EventMap.containsKey(eventTag)){
+			return instance().mTag2EventMap.get(eventTag);
+		} else {
+			throw new NoSuchElementException("The eventTag \"" + eventTag + "\" is not registered");
+		}
+	}
+
+	@NonNull
+	public static EventPoster poster(int eventTag){
+		return poster(String.valueOf(eventTag));
+	}
+
+	@NonNull
+	public static EventPoster poster(@NonNull String eventTag){
+		Event event = instance().mTag2EventMap.get(eventTag);
+		if (event == null) {
+			throw new NoSuchElementException("The eventTag \"" + eventTag + "\" is not registered");
+		}
+		return new PosterImpl(event);
+	}
+
+	public static void cancelEvent(int eventTag) {
+		cancelEvent(String.valueOf(eventTag));
+	}
+	
+	public static void cancelEvent(@NonNull String eventTag) {
+		Event event = get(eventTag);
+		if (event != null) {
+			event.cancel();
+		}
+	}
+
 	private static class RegisterImpl implements EventRegister{
 		
 		private String eventTag;
-		private OnEventProcessor processor;
+		private Event event;
+		private EventProcessor processor;
 		private OnEventListener listener;
+		private boolean justNotifyInActive;
 
 		RegisterImpl(String eventTag){
 			this.eventTag = eventTag;
 		}
 
 		@Override
-		public EventRegister setEventProcessor(@NonNull OnEventProcessor processor) {
+		public EventRegister setEventProcessor(@NonNull EventProcessor processor) {
 			this.processor = processor;
 			return this;
 		}
@@ -118,20 +245,50 @@ public class EventBus {
 		}
 
 		@Override
+		public EventRegister addEventListener(@NonNull OnEventListener listener, boolean justNotifyInActive) {
+			this.listener = listener;
+			this.justNotifyInActive = justNotifyInActive;
+			return this;
+		}
+
+		@Override
 		public void register(Object object) {
-			Event event = instance().mTag2EventMap.putIfAbsent(eventTag, new Event(eventTag));
+			event = instance().mTag2EventMap.putIfAbsent(eventTag, new Event(eventTag));
 			if (event == null){
 				event = instance().mTag2EventMap.get(eventTag);
 			}
-			if (processor != null) event.setEventProcessor(processor);
-			if (listener != null) event.addEventListener(listener);
-			if (object instanceof LifecycleOwner){
-				((LifecycleOwner)object).getLifecycle().addObserver(new AutoUnregisterEvent(object, eventTag, listener));
-			} else {
-				try {
-					throw new Exception("you need to unregister the EventListener on " + object);
-				} catch (Exception e) {
-					e.printStackTrace();
+			if (processor != null) {
+				instance().mTag2ProcessorMap.put(eventTag, processor);
+			}
+			if (this.listener != null) {
+				CopyOnWriteArrayList<EventListenerWrapper> listenerWrappers = instance().mTag2ListenersMap.get(eventTag);
+				if (listenerWrappers == null) {
+					listenerWrappers = new CopyOnWriteArrayList<>();
+					instance().mTag2ListenersMap.put(eventTag, listenerWrappers);
+				}
+				boolean isAdded = false;
+				EventListenerWrapper elw = null;
+				for (EventListenerWrapper listenerWrapper: listenerWrappers) {
+					if (listenerWrapper.getListener() == this.listener) {
+						isAdded = true;
+						elw = listenerWrapper;
+						elw.setJustNotifyInActive(this.justNotifyInActive);
+						break;
+					}
+				}
+				if (!isAdded) {
+					elw = new EventListenerWrapper(this.eventTag, this.listener, this.justNotifyInActive);
+					listenerWrappers.add(elw);
+				}
+				
+				if (object instanceof LifecycleOwner){
+					((LifecycleOwner)object).getLifecycle().addObserver(elw);
+				} else {
+					try {
+						throw new Exception("you need to unregister the EventListener on " + object);
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
 				}
 			}
 			processor = null;
@@ -141,161 +298,108 @@ public class EventBus {
 		@Override
 		public EventPoster registerAt(Object object) {
 			register(object);
-			return new PosterImpl(eventTag);
+			return new PosterImpl(event);
 		}
 
-	}
-	
-	@NonNull
-	public static EventPoster get(int eventTag){
-		return get(String.valueOf(eventTag));
-	}
-	
-	@NonNull
-	public static EventPoster get(@NonNull String eventTag){
-		if (instance().mTag2EventMap.containsKey(eventTag)){
-			return new PosterImpl(eventTag);
-		} else {
-			throw new NoSuchElementException("The eventTag \"" + eventTag + "\" is not registered");
-		}
 	}
 	
 	private static class PosterImpl implements EventPoster{
 
-		private String eventTag;
+		private long delay;
+		private Event event;
 
-		PosterImpl(String eventTag){
-			this.eventTag = eventTag;
-			//重置线程模式
-			instance().mTag2EventMap.get(eventTag).setProcessThreadMode(null);
-			instance().mTag2EventMap.get(eventTag).setObserveThreadMode(null);
+		PosterImpl(Event event){
+			this.event = event;
 		}
 
 		@Override
-		public EventPoster addParams(Object... params) {
-			instance().mTag2EventMap.get(eventTag).setParams(params);
+		public EventPoster setValues(Object... params) {
+			event.setValues(params);
 			return this;
 		}
 
 		@Override
-		public EventPoster processOn(ThreadMode threadMode) {
-			instance().mTag2EventMap.get(eventTag).setProcessThreadMode(threadMode);
-			return this;
-		}
-
-		@Override
-		public EventPoster observeOn(ThreadMode threadMode) {
-			instance().mTag2EventMap.get(eventTag).setObserveThreadMode(threadMode);
+		public EventPoster delay(long delay) {
+			this.delay = delay;
 			return this;
 		}
 
 		@Override
 		public void post() {
-			final Event event = instance().mTag2EventMap.get(eventTag);
-			instance().mEventDispatcher.dispatchEvent(event);
+			postTo(ThreadMode.MAIN);
 		}
 
 		@Override
-		public void post(final long delay) {
-			new Thread(new Runnable() {
-				@Override
-				public void run() {
+		public void postTo(ThreadMode mode) {
+			if (event.isPosting()) return;
+			event.init();
+			if (delay > 0) {
+				new Thread(() -> {
 					try {
 						Thread.sleep(delay);
 					} catch (InterruptedException e) {
 						e.printStackTrace();
 					}
-					post();
-				}
-			}).start();
+					if (!event.isCanceled()) {
+						event.setIsPosting(true);
+						EventBus.instance().processEvent(event, mode);
+					}
+					event = null;
+				}).start();
+			} else {
+				event.setIsPosting(true);
+				EventBus.instance().processEvent(event, mode);
+				event = null;
+			}
 		}
 	}
 	
-	private static class AutoUnregisterEvent implements LifecycleObserver{
-		private Object object;
+	private static class EventListenerWrapper implements LifecycleObserver {
+		
 		private String eventTag;
-		private OnEventListener eventListener;
+		private OnEventListener listener;
+		private boolean justNotifyInActive;
+		private boolean isActive;
 
-		AutoUnregisterEvent(Object object, String eventTag, OnEventListener eventListener){
-			this.object = object;
+		EventListenerWrapper(@NonNull String eventTag, OnEventListener listener, boolean justNotifyInActive) {
 			this.eventTag = eventTag;
-			this.eventListener = eventListener;
+			this.listener = listener;
+			this.justNotifyInActive = justNotifyInActive;
 		}
 		
-		@OnLifecycleEvent(Lifecycle.Event.ON_DESTROY) 
+		OnEventListener getListener() {
+			return this.listener;
+		}
+		
+		boolean isJustNotifyInActive() {
+			return this.justNotifyInActive;
+		}
+		
+		boolean isActive() {
+			return this.isActive;
+		}
+		
+		void release() {
+			this.listener = null;
+		}
+		
+		void setJustNotifyInActive(boolean justNotifyInActive) {
+			this.justNotifyInActive = justNotifyInActive;
+		}
+
+		@OnLifecycleEvent(Lifecycle.Event.ON_RESUME)
+		void onResume() {
+			this.isActive = true;
+		}
+
+		@OnLifecycleEvent(Lifecycle.Event.ON_PAUSE)
+		void onPause() {
+			this.isActive = false;
+		}
+
+		@OnLifecycleEvent(Lifecycle.Event.ON_DESTROY)
 		void onDestroy(){
-			instance().removeEventListener(eventTag, eventListener);
-			/*((LifecycleOwner)object).getLifecycle().removeObserver(this);
-			object = null;*/
-			eventListener = null;
-		}
-		
-	}
-
-	private class EventDispatcher {
-
-		private ExecutorService mExecutorService = Executors.newCachedThreadPool();
-
-		private Handler mMainHandler = new Handler(Looper.getMainLooper());
-
-		void dispatchEvent(final Event event){
-			ThreadMode processorThread = event.getProcessThreadMode();
-			if (processorThread == null || processorThread == ThreadMode.ASYNC){
-				processOnAsync(event);
-			} else if (processorThread == ThreadMode.MAIN){
-				processOnMain(event);
-			}
-		}
-
-		private void processOnAsync(final Event event){
-			mExecutorService.execute(new Runnable() {
-				@Override
-				public void run() {
-					event.executeEventProcessor();
-					if (event.getObserveThreadMode() == ThreadMode.ASYNC) {
-						event.callEventListeners();
-					}else {
-						mMainHandler.post(new Runnable() {
-							@Override
-							public void run() {
-								event.callEventListeners();
-							}
-						});
-					}
-				}
-			});
-		}
-
-		private void processOnMain(final Event event){
-			if (isMainThread()){
-				processOnMainInternal(event);
-			} else {
-				mMainHandler.post(new Runnable() {
-					@Override
-					public void run() {
-						processOnMainInternal(event);
-					}
-				});
-			}
-		}
-
-		private void processOnMainInternal(final Event event){
-			event.executeEventProcessor();
-			if (event.getObserveThreadMode() == ThreadMode.ASYNC) {
-				mExecutorService.execute(new Runnable() {
-					@Override
-					public void run() {
-						event.callEventListeners();
-					}
-				});
-			} else {
-				event.callEventListeners();
-			}
-		}
-
-		private boolean isMainThread(){
-			return Looper.getMainLooper().getThread() == Thread.currentThread();
+			EventBus.instance().removeEventListener(eventTag, this);
 		}
 	}
-	
 }

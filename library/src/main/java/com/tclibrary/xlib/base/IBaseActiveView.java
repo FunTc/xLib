@@ -1,9 +1,10 @@
 package com.tclibrary.xlib.base;
 
-import android.support.annotation.NonNull;
-import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.widget.TextView;
+
+import androidx.annotation.NonNull;
+import androidx.appcompat.widget.Toolbar;
 
 /**
  * Created by FunTc on 2018/10/18.

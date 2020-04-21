@@ -1,7 +1,5 @@
 package com.tclibrary.xlib.http;
 
-import android.support.annotation.NonNull;
-
 import com.google.gson.Gson;
 
 import java.io.IOException;
@@ -10,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
+import androidx.annotation.NonNull;
 import okhttp3.FormBody;
 import okhttp3.HttpUrl;
 import okhttp3.Interceptor;

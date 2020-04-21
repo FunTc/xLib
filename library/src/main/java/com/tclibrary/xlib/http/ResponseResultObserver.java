@@ -2,7 +2,6 @@ package com.tclibrary.xlib.http;
 
 import android.accounts.NetworkErrorException;
 import android.net.ParseException;
-import android.support.annotation.NonNull;
 
 import com.google.gson.JsonParseException;
 import com.orhanobut.logger.Logger;
@@ -14,6 +13,7 @@ import java.net.ConnectException;
 import java.net.UnknownHostException;
 import java.util.concurrent.TimeoutException;
 
+import androidx.annotation.NonNull;
 import io.reactivex.Observer;
 import io.reactivex.disposables.Disposable;
 import retrofit2.HttpException;

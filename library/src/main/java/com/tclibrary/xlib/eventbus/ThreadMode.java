@@ -5,9 +5,9 @@ package com.tclibrary.xlib.eventbus;
  */
 public enum ThreadMode {
 	
-	/** 将事件执行在UI线程 */
+	/** UI线程 */
 	MAIN,
 	
-	/** 将事件执行在一个子线程中 */
+	/** 子线程 */
 	ASYNC
 }

@@ -2,13 +2,14 @@ package com.tclibrary.xlib;
 
 import android.app.Application;
 import android.content.Context;
-import android.support.annotation.Nullable;
 
 import com.blankj.utilcode.util.Utils;
 import com.orhanobut.logger.AndroidLogAdapter;
 import com.orhanobut.logger.FormatStrategy;
 import com.orhanobut.logger.Logger;
 import com.orhanobut.logger.PrettyFormatStrategy;
+
+import androidx.annotation.Nullable;
 
 /**
  * Created by FunTc on 2018/1/9.
