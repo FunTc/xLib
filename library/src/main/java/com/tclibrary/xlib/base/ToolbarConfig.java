@@ -9,21 +9,21 @@ import androidx.annotation.DrawableRes;
  */
 public class ToolbarConfig {
 
-	public boolean 		hasTitle = true;
+	public boolean 		hasTitle;
 	public boolean 		hasBackButton;
 	@DrawableRes 
-	public int 			mBackBtnRes;
-	public CharSequence mTitle;
-	public CharSequence mRightBtnText;
+	public int 			backBtnRes;
+	public CharSequence title;
+	public CharSequence rightBtnText;
 	@ColorInt
-	public int			mRightBtnTextColor = -1;
-	public Drawable 	mRightBtnImage;
+	public int 			rightBtnTextColor = -1;
+	public Drawable 	rightBtnImage;
 	@DrawableRes 
-	public int 			mRightBtnImageRes;
-	public int			mElevation = -1;
+	public int 			rightBtnImageRes;
+	public int 			elevation = -1;
 	public boolean		hasCloseButton;
 	@DrawableRes 
-	public int			mCloseBtnRes;
+	public int 			closeBtnRes;
 	@ColorInt
-	public int			mTitleTextColor = -1;
+	public int 			titleTextColor = -1;
 }
