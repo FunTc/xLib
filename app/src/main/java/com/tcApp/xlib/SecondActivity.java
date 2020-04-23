@@ -13,7 +13,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 /**
- * Created by TianCheng on 2020/03/30.
+ * Created by FunTc on 2020/03/30.
  */
 public class SecondActivity extends AppCompatActivity implements View.OnClickListener {
 

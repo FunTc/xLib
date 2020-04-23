@@ -15,7 +15,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textColor="@android:color/white"
-        android:textSize="18sp"
+        android:textSize="@dimen/title_text_size"
         android:maxWidth="150dp"
         android:gravity="center"
         tools:text="标题"
@@ -29,7 +29,7 @@
         style="@style/toolbarButtonStyle"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
-        android:layout_gravity="right"
+        android:layout_gravity="end"
         android:contentDescription="@string/app_name"/>
     
     <TextView
@@ -39,8 +39,8 @@
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
         android:gravity="center"
-        android:layout_gravity="right"
-        android:textSize="15sp"
+        android:layout_gravity="end"
+        android:textSize="@dimen/title_right_btn_text_size"
         android:textColor="@android:color/white"
         tools:text="按钮"/>
     
