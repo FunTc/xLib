@@ -1,10 +1,9 @@
 package com.tcApp.xlib;
 
 import android.os.Bundle;
-import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.TextView;
 
-import com.tcApp.xlib.databinding.ActiivtySecondBinding;
 import com.tclibrary.xlib.eventbus.Event;
 import com.tclibrary.xlib.eventbus.EventBus;
 import com.tclibrary.xlib.eventbus.OnEventListener;
@@ -17,14 +16,14 @@ import androidx.appcompat.app.AppCompatActivity;
  */
 public class SecondActivity extends AppCompatActivity implements View.OnClickListener {
 
-    ActiivtySecondBinding viewBinding;
+    private TextView tvInfo;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        viewBinding = ActiivtySecondBinding.inflate(LayoutInflater.from(this));
-        setContentView(viewBinding.getRoot());
-        viewBinding.button.setOnClickListener(this);
+        setContentView(R.layout.activity_second);
+        findViewById(R.id.button).setOnClickListener(this);
+        tvInfo = findViewById(R.id.tvInfo);
 
         EventBus.add("simpleEvent").addEventListener(onEventListener).register(this);
     }
@@ -38,7 +37,7 @@ public class SecondActivity extends AppCompatActivity implements View.OnClickLis
         @Override
         public void onEventResult(@NonNull Event event) {
             String info = event.findValue(String.class, "我是没有获取到的默认值");
-            viewBinding.tvInfo.setText(info);
+            tvInfo.setText(info);
         }
     };
     

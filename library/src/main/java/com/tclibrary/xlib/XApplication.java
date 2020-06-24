@@ -4,12 +4,6 @@ import android.app.Application;
 import android.content.Context;
 
 import com.blankj.utilcode.util.Utils;
-import com.orhanobut.logger.AndroidLogAdapter;
-import com.orhanobut.logger.FormatStrategy;
-import com.orhanobut.logger.Logger;
-import com.orhanobut.logger.PrettyFormatStrategy;
-
-import androidx.annotation.Nullable;
 
 /**
  * Created by FunTc on 2018/1/9.
@@ -25,33 +19,12 @@ public class XApplication extends Application {
 		super.onCreate();
 		registerActivityLifecycleCallbacks(new ActivityLifecycle());
 		applicationContext = getApplicationContext();
-		initLogger();
 		Utils.init(this);
 		CrashHandler.getInstance().init(this);
-		
 	}
 
 	public static Context getAppContext(){
 		return applicationContext;
-	}
-	
-	private void initLogger(){
-		String[] strings = getPackageName().split("[.]");
-		String tag = strings[strings.length - 1] + "_log";
-		FormatStrategy formatStrategy = PrettyFormatStrategy.newBuilder()
-				.showThreadInfo(false)
-				.tag(tag)
-				.build();
-		Logger.addLogAdapter(new AndroidLogAdapter(formatStrategy){
-			@Override
-			public boolean isLoggable(int priority, @Nullable String tag) {
-				return isLoggerEnable();
-			}
-		});
-	}
-	
-	protected boolean isLoggerEnable(){
-		return BuildConfig.DEBUG;
 	}
 	
 }

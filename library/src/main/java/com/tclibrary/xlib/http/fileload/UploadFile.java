@@ -1,4 +1,4 @@
-package com.tclibrary.xlib.http;
+package com.tclibrary.xlib.http.fileload;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -6,10 +6,9 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Created by FunTc on 2018/10/22.
+ * Created by FunTc on 2020/06/24.
  */
-@Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
-public @interface BaseURL {
-	String value();
+@Target(ElementType.METHOD)
+public @interface UploadFile {
 }

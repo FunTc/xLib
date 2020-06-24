@@ -1,6 +1,7 @@
 package com.tclibrary.xlib.http;
 
-import com.google.gson.Gson;
+import com.blankj.utilcode.util.GsonUtils;
+import com.google.gson.reflect.TypeToken;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -31,6 +32,7 @@ public class CommonParamsInterceptor implements Interceptor {
 		mRequestParamsHandler = requestParamsHandler;
 	}
 
+	@NonNull
 	@Override
 	public Response intercept(@NonNull Chain chain) throws IOException {
 		Request oldRequest = chain.request();
@@ -82,12 +84,10 @@ public class CommonParamsInterceptor implements Interceptor {
 				Buffer buffer = new Buffer();
 				Objects.requireNonNull(oldBody).writeTo(buffer);
 				String oldJsonParams = buffer.readUtf8();
-				Gson gson = new Gson();
-				@SuppressWarnings("unchecked")
-				Map<String, String> originalParams = gson.fromJson(oldJsonParams, Map.class);
+				Map<String, String> originalParams = GsonUtils.fromJson(oldJsonParams, new TypeToken<Map<String, String>>(){}.getType());
 				requestParams.putAll(originalParams);
 				mRequestParamsHandler.handleParams(requestParams);
-				String newJsonParams = gson.toJson(requestParams);
+				String newJsonParams = GsonUtils.toJson(requestParams);
 				newRequestBuilder = oldRequest.newBuilder().post(RequestBody.create(MediaType.parse("application/json; charset=utf-8"), newJsonParams));
 			}
 		} else {
