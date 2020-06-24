@@ -17,7 +17,7 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 /**
- * Created by TianCheng on 2020/04/23.
+ * Created by FunTc on 2020/04/23.
  */
 public abstract class AbsBaseFragment extends Fragment implements IToolbarHolder {
 

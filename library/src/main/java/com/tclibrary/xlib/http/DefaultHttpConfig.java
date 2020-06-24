@@ -2,8 +2,8 @@ package com.tclibrary.xlib.http;
 
 import com.tclibrary.xlib.BuildConfig;
 import com.tclibrary.xlib.XApplication;
-import com.tclibrary.xlib.http.log.DefaultHttpLogPrinter;
 import com.tclibrary.xlib.http.log.HttpLoggerInterceptor;
+import com.tclibrary.xlib.http.log.XDefaultHttpLogPrinter;
 
 import java.io.File;
 import java.util.concurrent.TimeUnit;
@@ -30,7 +30,7 @@ public class DefaultHttpConfig implements IHttpConfig {
 				.addInterceptor(new CacheInterceptor())
 				.addInterceptor(new CommonParamsInterceptor(new RequestParamsHandlerImpl()));
 		if (BuildConfig.DEBUG){
-			builder.addInterceptor(new HttpLoggerInterceptor(new DefaultHttpLogPrinter(), HttpLoggerInterceptor.Level.ALL));
+			builder.addInterceptor(new HttpLoggerInterceptor(new XDefaultHttpLogPrinter(), HttpLoggerInterceptor.Level.ALL));
 		}
 	}
 

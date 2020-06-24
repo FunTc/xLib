@@ -2,7 +2,6 @@ package com.tclibrary.xlib.http;
 
 import com.tclibrary.xlib.view.HttpProgressDialogHelper;
 
-import java.lang.reflect.Field;
 import java.util.Map;
 
 import androidx.annotation.NonNull;
@@ -81,6 +80,25 @@ public class HttpManager {
 		}
 	}
 
+	public String getServiceURL() {
+		return getServiceURL(null);
+	}
+
+	public String getServiceURL(Class<?> serviceClz) {
+		if (serviceClz == null) {
+			return mDefaultURL;
+		} else {
+			String serviceURL = mServiceUrls.get(serviceClz.getCanonicalName());
+			if (serviceURL == null) {
+				serviceURL = findBaseUrlBy(serviceClz);
+			}
+			if (serviceURL == null) {
+				serviceURL = mDefaultURL;
+			}
+			return serviceURL;
+		}
+	}
+
 	/** 
 	 * 根据Api的接口类获得其retrofit处理后的实例
 	 * @param service Api接口类
@@ -97,15 +115,9 @@ public class HttpManager {
 		return (T) retrofitService;
 	}
 
-	private Retrofit createRetrofit(final Class service){
+	private Retrofit createRetrofit(final Class<?> service){
 		if (mOkHttpClient == null) createOkHttpClient();
-		String serviceURL = mServiceUrls.get(service.getCanonicalName());
-		if (serviceURL == null) {
-			serviceURL = findBaseUrlBy(service);
-		}
-		if (serviceURL == null) {
-			serviceURL = mDefaultURL;
-		}
+		String serviceURL = getServiceURL(service);
 		Retrofit.Builder builder = new Retrofit.Builder()
 				.baseUrl(serviceURL).client(mOkHttpClient);
 		IHttpConfig config = mHttpConfig == null ? new DefaultHttpConfig() : mHttpConfig;
@@ -119,17 +131,11 @@ public class HttpManager {
 		config.onOkHttpClientConfig(builder);
 		mOkHttpClient = builder.build();
 	}
-
-	private String findBaseUrlBy(Class clz){
-		for (Field f : clz.getDeclaredFields()){
-			boolean hasBaseURL = f.isAnnotationPresent(BaseURL.class);
-			if (hasBaseURL){
-				try {
-					return (String) f.get(clz);
-				} catch (IllegalAccessException e) {
-					return null;
-				}
-			}
+	
+	private String findBaseUrlBy(Class<?> clz){
+		BaseURL urlAnnotation = clz.getAnnotation(BaseURL.class);
+		if (urlAnnotation != null) {
+			return urlAnnotation.value();
 		}
 		return null;
 	}
@@ -138,7 +144,7 @@ public class HttpManager {
 		if (mOkHttpClient == null) createOkHttpClient();
 		return mOkHttpClient;
 	}
-
+	
 	public static <T> ObservableTransformer<T, T> switchThread(){
 		return new ObservableTransformer<T, T>() {
 			@Override

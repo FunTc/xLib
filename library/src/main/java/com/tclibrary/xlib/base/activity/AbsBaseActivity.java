@@ -53,15 +53,15 @@ public abstract class AbsBaseActivity extends AppCompatActivity implements ITool
 		return new DefaultToolbar(this);
 	}
 
-	public int getLayoutViewId() {
+	protected int getLayoutViewId() {
 		return 0;
 	}
 
-	public View getLayoutView() {
+	protected View getLayoutView() {
 		return null;
 	}
 
-	public void preSetContentView() {}
+	protected void preSetContentView() {}
 
 	protected void addPlugin(@NonNull BaseActivityPlugin plugin){
 		getLifecycle().addObserver(plugin);

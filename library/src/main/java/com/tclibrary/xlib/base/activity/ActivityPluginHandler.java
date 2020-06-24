@@ -11,7 +11,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 /**
- * Created by TianCheng on 2020/04/23.
+ * Created by FunTc on 2020/04/23.
  */
 class ActivityPluginHandler {
 

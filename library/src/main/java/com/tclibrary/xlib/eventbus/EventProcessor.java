@@ -12,4 +12,6 @@ public interface EventProcessor {
 	default boolean isAsync() {
 		return true;
 	}
+	
+	void cancel(boolean mayInterruptIfRunning);
 }

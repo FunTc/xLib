@@ -8,6 +8,7 @@ import org.json.JSONObject;
 
 import java.io.StringReader;
 import java.io.StringWriter;
+import java.util.Arrays;
 
 import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Source;
@@ -76,6 +77,20 @@ public class SystemUtils {
 			message = xml;
 		}
 		return message;
+	}
+
+
+	/**
+	 * 拼接两个数组
+	 * @param first  数组1
+	 * @param second 数组2
+	 * @param <T> 数组类型
+	 * @return 拼接好的数组
+	 */
+	public static <T> T[] concat(T[] first, T[] second) {
+		T[] result = Arrays.copyOf(first, first.length + second.length);
+		System.arraycopy(second, 0, result, first.length, second.length);
+		return result;
 	}
 	
 }

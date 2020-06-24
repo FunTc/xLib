@@ -4,14 +4,13 @@ import android.os.Handler;
 import android.os.Looper;
 
 import java.util.List;
-import java.util.NoSuchElementException;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 import androidx.annotation.NonNull;
-import androidx.collection.ArrayMap;
 import androidx.lifecycle.Lifecycle;
 import androidx.lifecycle.LifecycleObserver;
 import androidx.lifecycle.LifecycleOwner;
@@ -34,7 +33,8 @@ public class EventBus {
 	
 	private ConcurrentHashMap<String, Event> mTag2EventMap = new ConcurrentHashMap<>();
 	private ConcurrentHashMap<String, CopyOnWriteArrayList<EventListenerWrapper>> mTag2ListenersMap = new ConcurrentHashMap<>();
-	private ArrayMap<String, EventProcessor> mTag2ProcessorMap = new ArrayMap<>();
+	private ConcurrentHashMap<String, EventProcessor> mTag2ProcessorMap = new ConcurrentHashMap<>();
+	private ConcurrentHashMap<String, Future<?>> mTag2FutureTaskMap = new ConcurrentHashMap<>();
 
 	private ExecutorService mExecutorService = Executors.newCachedThreadPool();
 	private Handler mMainHandler = new Handler(Looper.getMainLooper());
@@ -49,7 +49,8 @@ public class EventBus {
 		EventProcessor processor = mTag2ProcessorMap.get(tag);
 		if (processor != null) {
 			if (processor.isAsync()) {
-				mExecutorService.execute(() -> processEventInternal(event, processor, observerThreadMode));
+				Future<?> future = mExecutorService.submit(() -> processEventInternal(event, processor, observerThreadMode));
+				mTag2FutureTaskMap.put(tag, future);
 			} else {
 				if (isMainThread()) {
 					processEventInternal(event, processor, observerThreadMode);
@@ -65,6 +66,7 @@ public class EventBus {
 	private void processEventInternal(Event event, @NonNull EventProcessor processor, ThreadMode observerThreadMode) {
 		try {
 			processor.onProcess(event);
+			mTag2FutureTaskMap.remove(event.getEventTag());
 			if (event.isCanceled()) {
 				event.setIsPosting(false);
 			} else {
@@ -86,7 +88,8 @@ public class EventBus {
 			}
 		} else {
 			if (isMainThread()) {
-				mExecutorService.execute(() -> dispatchEventInternal(event));
+				Future<?> future = mExecutorService.submit(() -> dispatchEventInternal(event));
+				mTag2FutureTaskMap.put(event.getEventTag(), future);
 			} else {
 				dispatchEventInternal(event);
 			}
@@ -106,6 +109,7 @@ public class EventBus {
 			}
 		}
 		event.setIsPosting(false);
+		mTag2FutureTaskMap.remove(event.getEventTag());
 	}
 
 	public void removeEvent(int eventTag){
@@ -188,11 +192,7 @@ public class EventBus {
 	}
 
 	public static Event get(@NonNull String eventTag){
-		if (instance().mTag2EventMap.containsKey(eventTag)){
-			return instance().mTag2EventMap.get(eventTag);
-		} else {
-			throw new NoSuchElementException("The eventTag \"" + eventTag + "\" is not registered");
-		}
+		return instance().mTag2EventMap.get(eventTag);
 	}
 
 	@NonNull
@@ -204,7 +204,7 @@ public class EventBus {
 	public static EventPoster poster(@NonNull String eventTag){
 		Event event = instance().mTag2EventMap.get(eventTag);
 		if (event == null) {
-			throw new NoSuchElementException("The eventTag \"" + eventTag + "\" is not registered");
+			event = new Event(eventTag);
 		}
 		return new PosterImpl(event);
 	}
@@ -217,6 +217,14 @@ public class EventBus {
 		Event event = get(eventTag);
 		if (event != null) {
 			event.cancel();
+			EventProcessor processor = instance().mTag2ProcessorMap.get(eventTag);
+			if (processor != null) {
+				processor.cancel(true);
+			}
+			Future<?> future = instance().mTag2FutureTaskMap.get(eventTag);
+			if (future != null) {
+				future.cancel(true);
+			}
 		}
 	}
 
@@ -283,12 +291,6 @@ public class EventBus {
 				
 				if (object instanceof LifecycleOwner){
 					((LifecycleOwner)object).getLifecycle().addObserver(elw);
-				} else {
-					try {
-						throw new Exception("you need to unregister the EventListener on " + object);
-					} catch (Exception e) {
-						e.printStackTrace();
-					}
 				}
 			}
 			processor = null;

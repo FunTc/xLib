@@ -5,7 +5,7 @@ import com.tclibrary.xlib.view.HttpProgressDialogHelper;
 /**
  * Created by FunTc on 2018/10/29.
  */
-public abstract class ProgressResponseResultObserver<T extends IResponseResult> extends ResponseResultObserver<T> {
+public abstract class ProgressResponseResultObserver<T> extends ResponseResultObserver<T> {
 
 	private String message;
 	

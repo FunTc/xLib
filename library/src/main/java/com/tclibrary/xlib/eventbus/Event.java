@@ -51,17 +51,19 @@ public class Event {
 	void setValues(Object... values){
 		mValues = values;
 	}
-	
-	public Object getValue(int index){
+
+	@SuppressWarnings("unchecked")
+	public <T> T getValue(int index){
 		if (mValues != null && index < mValues.length){
-			return mValues[index];
+			return (T)mValues[index];
 		}
 		return null;
 	}
 
-	public Object getProcessedValue(int index) {
+	@SuppressWarnings("unchecked")
+	public <T> T getProcessedValue(int index) {
 		if (mProcessedValues != null && index < mProcessedValues.size()){
-			return mProcessedValues.get(index);
+			return (T)mProcessedValues.get(index);
 		}
 		return null;
 	}
@@ -163,14 +165,14 @@ public class Event {
 		builder.append(super.toString())
 				.append("{")
 				.append("\"eventTag\"：").append(mEventTag).append(", ")
-				.append("\"params\"：[");
+				.append("\"values\"：[");
 		if (mValues != null){
 			for (int i = 0; i < mValues.length; i++){
 				builder.append(mValues[i]);
 				if (i < mValues.length - 1) builder.append(", ");
 			}
 		}
-		builder.append("], \"returnParams\"：[");
+		builder.append("], \"returnValues\"：[");
 		if (mProcessedValues != null){
 			for (Object o : mProcessedValues){
 				builder.append(o);
