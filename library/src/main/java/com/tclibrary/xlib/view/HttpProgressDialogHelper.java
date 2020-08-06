@@ -6,7 +6,7 @@ import android.os.Looper;
 /**
  * Created by FunTc on 2018/10/29.
  */
-public class HttpProgressDialogHelper implements IProgressView {
+public class HttpProgressDialogHelper {
 
 	private static final class InstanceHolder {
 		private static final HttpProgressDialogHelper INSTANCE = new HttpProgressDialogHelper();
@@ -16,6 +16,7 @@ public class HttpProgressDialogHelper implements IProgressView {
 		return InstanceHolder.INSTANCE;
 	}
 
+	private final static long SHOW_TIMEOUT	=	20_000;
 	private IProgressView mIProgressView;
 	private Handler mMainHandler;
 	
@@ -28,50 +29,36 @@ public class HttpProgressDialogHelper implements IProgressView {
 		mIProgressView = progressView;
 	}
 
-	@Override
-	public void show() {
-		if (isMainThread()){
-			mIProgressView.show();
-		} else {
-			mMainHandler.post(new Runnable() {
-				@Override
-				public void run() {
-					mIProgressView.show();
-				}
-			});
-		}
+	public void show(long timeout) {
+		show(null, timeout);
 	}
-
-	@Override
-	public void show(final CharSequence msg) {
+	
+	public void show(final CharSequence msg, long timeout) {
 		if (isMainThread()){
 			mIProgressView.show(msg);
 		} else {
-			mMainHandler.post(new Runnable() {
-				@Override
-				public void run() {
-					mIProgressView.show(msg);
-				}
-			});
+			mMainHandler.post(() -> mIProgressView.show(msg));
 		}
+		mMainHandler.postDelayed(this::dismiss, timeout);
+	}
+	
+	public void show() {
+		show(SHOW_TIMEOUT);
 	}
 
-	@Override
+	public void show(final CharSequence msg) {
+		show(msg, SHOW_TIMEOUT);
+	}
+
 	public boolean isShowing() {
 		return mIProgressView.isShowing();
 	}
 
-	@Override
 	public void dismiss() {
 		if (isMainThread()){
 			mIProgressView.dismiss();
 		} else {
-			mMainHandler.post(new Runnable() {
-				@Override
-				public void run() {
-					mIProgressView.dismiss();
-				}
-			});
+			mMainHandler.post(() -> mIProgressView.dismiss());
 		}
 	}
 

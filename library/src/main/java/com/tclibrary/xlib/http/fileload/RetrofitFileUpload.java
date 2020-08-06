@@ -35,7 +35,7 @@ public class RetrofitFileUpload {
         @Override
         public RequestBody convert(@NonNull Map<String, Object> value) throws IOException {
             MultipartBody.Builder builder = new MultipartBody.Builder();
-            builder.setType(MultipartBody.ALTERNATIVE);
+            builder.setType(MultipartBody.FORM);
             for (Map.Entry<String, Object> entry : value.entrySet()) {
                 Object obj = entry.getValue();
                 if (obj instanceof File) {

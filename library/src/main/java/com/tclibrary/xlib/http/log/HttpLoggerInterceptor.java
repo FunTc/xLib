@@ -8,6 +8,7 @@ import com.tclibrary.xlib.utils.SystemUtils;
 import java.io.IOException;
 import java.net.URLDecoder;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
@@ -48,6 +49,7 @@ public class HttpLoggerInterceptor implements Interceptor {
 		printLevel = level;
 	}
 
+	@NonNull
 	@Override
 	public Response intercept(@NonNull Chain chain) throws IOException {
 		Request request = chain.request();
@@ -91,7 +93,7 @@ public class HttpLoggerInterceptor implements Interceptor {
 			try {
 				Buffer requestBuffer = new Buffer();
 				body.writeTo(requestBuffer);
-				Charset charset = Charset.forName("UTF-8");
+				Charset charset = StandardCharsets.UTF_8;
 				MediaType contentType = body.contentType();
 				if (contentType != null) {
 					charset = contentType.charset(charset);
@@ -112,7 +114,7 @@ public class HttpLoggerInterceptor implements Interceptor {
 			try {
 				BufferedSource source = body.source();
 				source.request(Long.MAX_VALUE); // Buffer the entire body.
-				Buffer buffer = source.buffer();
+				Buffer buffer = source.getBuffer();
 				//获取content的压缩类型
 				String encoding = response.headers().get("Content-Encoding");
 				Buffer clone = buffer.clone();
@@ -135,7 +137,7 @@ public class HttpLoggerInterceptor implements Interceptor {
 	 * 解析服务器响应的内容
 	 */
 	private String parseContent(ResponseBody responseBody, String encoding, Buffer clone) {
-		Charset charset = Charset.forName("UTF-8");
+		Charset charset = StandardCharsets.UTF_8;
 		MediaType contentType = responseBody.contentType();
 		if (contentType != null) {
 			charset = contentType.charset(charset);

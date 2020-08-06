@@ -39,12 +39,12 @@ public abstract class ResponseResultObserver<T> implements Observer<T> {
 	@Override
 	public void onNext(T t) {
 		onEndRequest();
-		if (t instanceof IResponseResult) {
-			IResponseResult result = (IResponseResult) t;
-			if (result.isRequestSuccess()) {
+		if (t instanceof IResult) {
+			IResult result = (IResult) t;
+			if (result.isSuccess()) {
 				onSuccess(t);
 			} else {
-				onFailed(new ResponseResultException(result.getResponseCode(), result.getResponseMessage()));
+				onFailed(new ResponseResultException(result.getCode(), result.getMessage()));
 			}
 		}
 	}

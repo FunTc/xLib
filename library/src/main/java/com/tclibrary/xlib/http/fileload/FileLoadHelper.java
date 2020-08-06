@@ -26,6 +26,7 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
+import okhttp3.ResponseBody;
 import okio.Buffer;
 import okio.BufferedSink;
 import okio.BufferedSource;
@@ -69,7 +70,7 @@ public final class FileLoadHelper {
 
     public static <T> Call uploadFile(@NonNull String url, @NonNull Map<String, Object> params, FileLoadCallback<T> callback) {
         MultipartBody.Builder builder = new MultipartBody.Builder();
-        builder.setType(MultipartBody.ALTERNATIVE);
+        builder.setType(MultipartBody.FORM);
         for (Map.Entry<String, Object> entry : params.entrySet()) {
             Object obj = entry.getValue();
             if (obj instanceof File) {
@@ -127,24 +128,39 @@ public final class FileLoadHelper {
 
             @Override
             public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
-                long contentLen = response.body().contentLength();
-
+                if (!response.isSuccessful()) {
+                    if (callback != null) callback.onFailure(call, new IOException("download failed"));
+                    return;
+                }
+                ResponseBody body = response.body();
+                if (body == null) return;
+                
+                long contentLen = body.contentLength();
+                MediaType mediaType = body.contentType();
+                String contentType = mediaType == null ? "" : mediaType.toString();
                 FileInfo fileInfo = new FileInfo();
                 fileInfo.setName(destFileName);
                 fileInfo.setPath(destFile.getPath());
                 fileInfo.setSize(contentLen);
-                fileInfo.setType(response.body().contentType().type());
+                fileInfo.setType(contentType);
 
                 BufferedSink sink = Okio.buffer(Okio.sink(destFile));
                 Buffer buffer = sink.buffer();
                 long total = 0;
                 long len;
                 int bufferSize = 200 * 1024;
-                BufferedSource source = response.body().source();
+                BufferedSource source = body.source();
+                long lastTotalBytesRead = 0;
+                long lastTime = 0;
                 while ((len = source.read(buffer, bufferSize)) != -1) {
                     sink.emit();
                     total += len;
-                    if (callback != null) callback.onProgress(total, contentLen, false);
+                    long currentTime = System.currentTimeMillis();
+                    if (callback != null && total > lastTotalBytesRead && currentTime - lastTime > 30) {
+                        callback.onProgress(total, contentLen, false);
+                        lastTotalBytesRead = total;
+                        lastTime = currentTime;
+                    }
                 }
                 source.close();
                 sink.close();
@@ -165,32 +181,26 @@ public final class FileLoadHelper {
         private String url;
         private String destDir;
         private String destFileName;
-        private FileLoadProgressListener progressListener;
         
         RxDownload() { }
 
-        RxDownload url(@NonNull String url) {
+        public RxDownload url(@NonNull String url) {
             this.url = url;
             return this;
         }
         
-        RxDownload destination(@NonNull String destDir) {
+        public RxDownload destination(@NonNull String destDir) {
             this.destDir = destDir;
             return this;
         }
         
-        RxDownload destination(@NonNull String destDir, String destFileName) {
+        public RxDownload destination(@NonNull String destDir, String destFileName) {
             this.destDir = destDir;
             this.destFileName = destFileName;
             return this;
         }
-        
-        RxDownload progress(@NonNull FileLoadProgressListener progressListener) {
-            this.progressListener = progressListener;
-            return this;
-        }
-        
-        Flowable<FileInfo> create() {
+
+        public Flowable<DownloadInfo> create() {
             if (TextUtils.isEmpty(destFileName)) {
                 Uri uri = Uri.parse(url);
                 destFileName = uri.getLastPathSegment();
@@ -202,15 +212,15 @@ public final class FileLoadHelper {
             if (!destFileDir.exists()) destFileDir.mkdirs();
             final File destFile = new File(destFileDir, destFileName);
             
-            return Flowable.create(new FlowableOnSubscribe<FileInfo>() {
+            return Flowable.create(new FlowableOnSubscribe<DownloadInfo>() {
                 @Override
-                public void subscribe(FlowableEmitter<FileInfo> emitter) throws Exception {
+                public void subscribe(FlowableEmitter<DownloadInfo> emitter) throws Exception {
                     download(url, destFile, emitter);
                 }
             }, BackpressureStrategy.BUFFER);
         }
         
-        private void download(String url, File destFile, FlowableEmitter<FileInfo> emitter) {
+        private void download(String url, File destFile, FlowableEmitter<DownloadInfo> emitter) {
             OkHttpClient client = HttpManager.instance().getOkHttpClient()
                     .newBuilder()
                     .readTimeout(100, TimeUnit.SECONDS)
@@ -234,30 +244,45 @@ public final class FileLoadHelper {
             
             try {
                 Response response = call.execute();
-                long contentLen = response.body().contentLength();
-                FileInfo fileInfo = new FileInfo();
-                fileInfo.setName(destFileName);
-                fileInfo.setPath(destFile.getPath());
-                fileInfo.setSize(contentLen);
-                fileInfo.setType(response.body().contentType().type());
+                if (!response.isSuccessful()) {
+                    throw new IOException("download failed");
+                }
+                ResponseBody responseBody = response.body();
+                if (responseBody == null) {
+                    throw new IOException("download failed");
+                }
+                long contentLen = responseBody.contentLength();
+                MediaType mediaType = responseBody.contentType();
+                String contentType = mediaType == null ? "" : mediaType.toString();
+                DownloadInfo downloadInfo = new DownloadInfo();
+                downloadInfo.setPath(destFile.getPath());
+                downloadInfo.setTotalSize(contentLen);
+                downloadInfo.setFileType(contentType);
 
                 BufferedSink sink = Okio.buffer(Okio.sink(destFile));
                 Buffer buffer = sink.buffer();
                 long total = 0;
                 long len;
                 int bufferSize = 200 * 1024;
-                BufferedSource source = response.body().source();
+                BufferedSource source = responseBody.source();
+                long lastTotalBytesRead = 0;
+                long lastTime = 0;
                 while ((len = source.read(buffer, bufferSize)) != -1) {
                     sink.emit();
                     total += len;
-                    if (progressListener != null) progressListener.onProgress(total, contentLen, false);
+                    long currentTime = System.currentTimeMillis();
+                    if (total > lastTotalBytesRead && currentTime - lastTime > 30) {
+                        downloadInfo.setCurrentSize(total);
+                        emitter.onNext(downloadInfo);
+                        lastTotalBytesRead = total;
+                        lastTime = currentTime;
+                    }
                 }
                 source.close();
                 sink.close();
-                if (progressListener != null) {
-                    progressListener.onProgress(contentLen, contentLen, true);
-                }
-                emitter.onNext(fileInfo);
+                downloadInfo.setCurrentSize(contentLen);
+                downloadInfo.setDone(true);
+                emitter.onNext(downloadInfo);
                 emitter.onComplete();
             } catch (IOException e) {
                 emitter.onError(e);

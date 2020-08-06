@@ -1,7 +1,5 @@
 package com.tclibrary.xlib.view;
 
-import android.content.DialogInterface;
-
 import com.tclibrary.xlib.AppManager;
 
 /**
@@ -22,12 +20,7 @@ public class DefaultHttpProgressViewHolder implements IProgressView {
 		if (isShowing()) dismiss();
 		mDialog = new ProgressDialog(AppManager.instance().getTopActivity());
 		mDialog.setMessage(msg);
-		mDialog.setOnDismissListener(new DialogInterface.OnDismissListener() {
-			@Override
-			public void onDismiss(DialogInterface dialog) {
-				mDialog = null;
-			}
-		});
+		mDialog.setOnDismissListener(dialog -> mDialog = null);
 		mDialog.show();
 	}
 

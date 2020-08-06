@@ -19,13 +19,17 @@ public class FileRequestBody extends RequestBody {
 
     public static final int MIN_INTERVAL = 50;
     
-    private final RequestBody mRequestBody;
+    private RequestBody mRequestBody;
     private final FileLoadProgressListener mListener;
     private BufferedSink bufferedSink;
     
     public FileRequestBody(@NonNull RequestBody requestBody, FileLoadProgressListener listener) {
         mRequestBody = requestBody;
         mListener = listener;
+    }
+    
+    public void setRequestBody(@NonNull RequestBody requestBody) {
+        mRequestBody = requestBody;
     }
     
     @Nullable
@@ -85,6 +89,11 @@ public class FileRequestBody extends RequestBody {
                 mListener.onProgress(bytesWritten, contentLength, bytesWritten == contentLength);
             }
         };
+    }
+    
+    @NonNull
+    public RequestBody getRawRequestBody() {
+        return mRequestBody;
     }
     
 }

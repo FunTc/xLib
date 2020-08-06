@@ -7,11 +7,13 @@ import android.view.View;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.Lifecycle;
+import androidx.lifecycle.LifecycleOwner;
 
 /**
  * Created by FunTc on 2018/11/5.
  */
-public abstract class BaseFragmentPlugin extends LifecyclePlugin {
+public abstract class BaseFragmentPlugin extends LifecycleObserverPlugin implements LifecycleOwner {
 	
 	protected Fragment mFragment;
 	
@@ -36,5 +38,11 @@ public abstract class BaseFragmentPlugin extends LifecyclePlugin {
 	public boolean onBackPressed() {
 		return false;
 	}
-	
+
+	@NonNull
+	@Override
+	public Lifecycle getLifecycle() {
+		return mFragment.getLifecycle();
+	}
+
 }

@@ -1,18 +1,22 @@
 package com.tclibrary.xlib.plugin;
 
-import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.MotionEvent;
 
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.Lifecycle;
+import androidx.lifecycle.LifecycleOwner;
+
 /**
  * Created by FunTc on 2018/11/5.
  */
-public abstract class BaseActivityPlugin extends LifecyclePlugin {
+public abstract class BaseActivityPlugin extends LifecycleObserverPlugin implements LifecycleOwner {
 
-	protected Activity mActivity;
+	protected AppCompatActivity mActivity;
 	
-	public void onAttachActivity(Activity activity){
+	public void onAttachActivity(AppCompatActivity activity){
 		mActivity = activity;
 	}
 	
@@ -31,5 +35,10 @@ public abstract class BaseActivityPlugin extends LifecyclePlugin {
 	public boolean onBackPressed() {
 		return false;
 	}
-	
+
+	@NonNull
+	@Override
+	public Lifecycle getLifecycle() {
+		return mActivity.getLifecycle();
+	}
 }

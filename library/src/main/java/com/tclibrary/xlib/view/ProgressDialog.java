@@ -2,6 +2,8 @@ package com.tclibrary.xlib.view;
 
 import android.app.Dialog;
 import android.content.Context;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.text.TextUtils;
 import android.view.View;
 import android.view.Window;
@@ -25,6 +27,7 @@ public class ProgressDialog extends Dialog {
 		mTvMsg = findViewById(R.id.tv);
 		Window window = getWindow();
 		if (window != null){
+			window.setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
 			WindowManager.LayoutParams params = window.getAttributes();
 			params.dimAmount = 0;
 			window.setAttributes(params);

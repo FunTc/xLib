@@ -7,7 +7,7 @@ import androidx.lifecycle.OnLifecycleEvent;
 /**
  * Created by FunTc on 2018/11/5.
  */
-public abstract class LifecyclePlugin implements IPlugin, LifecycleObserver {
+public abstract class LifecycleObserverPlugin implements IPlugin, LifecycleObserver {
 	
 	@OnLifecycleEvent(Lifecycle.Event.ON_CREATE) protected void onCreate() { }
 	
