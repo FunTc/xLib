@@ -47,19 +47,24 @@ public class XDefaultHttpLogPrinter implements IHttpLogPrinter {
 	
 	
 	private static void printLog(String tag, String content) {
-		/* 单个日志超过最大长度就分段打印 */
-		int MAX_LEN = 1100;
+		/* 单个日志超过最大长度就分段打印，Log打印的最大长度为4k Byte，
+		   考虑到有中文的情况(GBK编码中一个汉字占2个字节，UTF-8编码中一个汉字占3个字节)，Logcat一般都为UTF-8编码 */
+		int MAX_LEN = 3 * 1024;
 		int len = content.length();
 		int count = (len - END_LINE.length())/ MAX_LEN;
 		if (count > 0) {
 			int start = 0;
 			for (int i = 0; i < count; i++) {
-				int end = content.substring(start, MAX_LEN).lastIndexOf(LINE_SEPARATOR);
-				Log.i(tag, content.substring(start, end));
+				int end = content.lastIndexOf(LINE_SEPARATOR, start + MAX_LEN);
+				if (i > 0) {
+					Log.i(tag, " " + content.substring(start, end));
+				} else {
+					Log.i(tag, content.substring(start, end));
+				}
 				start = end;
 			}
 			if (start != len - END_LINE.length()) {
-				Log.i(tag, content.substring(start, len));
+				Log.i(tag, " " + content.substring(start, len));
 			}
 		} else {
 			Log.i(tag, content);
@@ -67,7 +72,7 @@ public class XDefaultHttpLogPrinter implements IHttpLogPrinter {
 	}
 
 	private static String processSingleTagMsg(boolean isRequest, String... contentLines) {
-		final int maxLen = (int) (END_LINE.length() * 1.3);
+		final int maxLen = (int) (END_LINE.length() * 1.6f);
 		StringBuilder sb = new StringBuilder();
 		sb.append(PLACEHOLDER).append(LINE_SEPARATOR);
 		if (isRequest) {
@@ -152,21 +157,25 @@ public class XDefaultHttpLogPrinter implements IHttpLogPrinter {
 	@Override
 	public void printResponseBasic(long elapsedTime, Response response) {
 		String tag = getTag(false);
+		String[] urlLine = { URL_TAG + response.request().url() };
 		String[] elaTimeLines = new String[]{ELAPSED_TAG + elapsedTime + "ms"};
 		String[] basicLines = formatResponseBasicInfo(response);
-		String[] contents = SystemUtils.concat(elaTimeLines, basicLines);
+		String[] contents = SystemUtils.concat(urlLine, elaTimeLines);
+		contents = SystemUtils.concat(contents, basicLines);
 		printLog(tag, processSingleTagMsg(false, contents));
 	}
 
 	@Override
 	public void printResponseBasicAndBody(long elapsedTime, Response response, String formatBodyStr) {
 		String tag = getTag(false);
+		String[] urlLine = { URL_TAG + response.request().url() };
 		String[] elaTimeLines = new String[]{ELAPSED_TAG + elapsedTime + "ms"};
 		String[] basicLines = formatResponseBasicInfo(response);
 		String bodyStr = LINE_SEPARATOR + BODY_TAG + LINE_SEPARATOR + formatBodyStr;
 		String[] bodyLines = TextUtils.isEmpty(formatBodyStr) ? NO_RESPONSE_BODY : bodyStr.split(LINE_SEPARATOR);
 		
-		String[] contents = SystemUtils.concat(elaTimeLines, basicLines);
+		String[] contents = SystemUtils.concat(urlLine, elaTimeLines);
+		contents = SystemUtils.concat(contents, basicLines);
 		contents = SystemUtils.concat(contents, new String[] {OMITTED_RESPONSE_HEADER});
 		contents = SystemUtils.concat(contents, bodyLines);
 
@@ -176,11 +185,13 @@ public class XDefaultHttpLogPrinter implements IHttpLogPrinter {
 	@Override
 	public void printResponseBasicAndHeader(long elapsedTime, Response response) {
 		String tag = getTag(false);
+		String[] urlLine = { URL_TAG + response.request().url() };
 		String[] elaTimeLines = new String[]{ELAPSED_TAG + elapsedTime + "ms"};
 		String[] basicLines = formatResponseBasicInfo(response);
 		String[] headerLines = formatResponseHeader(response);
 		
-		String[] contents = SystemUtils.concat(elaTimeLines, basicLines);
+		String[] contents = SystemUtils.concat(urlLine, elaTimeLines);
+		contents = SystemUtils.concat(contents, basicLines);
 		contents = SystemUtils.concat(contents, headerLines);
 		contents = SystemUtils.concat(contents, new String[] {OMITTED_RESPONSE_BODY});
 
@@ -190,13 +201,15 @@ public class XDefaultHttpLogPrinter implements IHttpLogPrinter {
 	@Override
 	public void printResponse(long elapsedTime, Response response, String formatBodyStr) {
 		String tag = getTag(false);
+		String[] urlLine = { URL_TAG + response.request().url() };
 		String[] elaTimeLines = new String[]{ELAPSED_TAG + elapsedTime + "ms"};
 		String[] basicLines = formatResponseBasicInfo(response);
 		String[] headerLines = formatResponseHeader(response);
 		String bodyStr = LINE_SEPARATOR + BODY_TAG + LINE_SEPARATOR + formatBodyStr;
 		String[] bodyLines = TextUtils.isEmpty(formatBodyStr) ? NO_RESPONSE_BODY : bodyStr.split(LINE_SEPARATOR);
 		
-		String[] contents = SystemUtils.concat(elaTimeLines, basicLines);
+		String[] contents = SystemUtils.concat(urlLine, elaTimeLines);
+		contents = SystemUtils.concat(contents, basicLines);
 		contents = SystemUtils.concat(contents, headerLines);
 		contents = SystemUtils.concat(contents, bodyLines);
 
@@ -239,7 +252,7 @@ public class XDefaultHttpLogPrinter implements IHttpLogPrinter {
 		boolean isSuccess = response.isSuccessful();
 		int code = response.code();
 		String message = response.message();
-		String log = STATUS_TAG + (isSuccess ? "success" : "failed") + " / " + code + " / " + message;
+		String log = STATUS_TAG + (isSuccess ? "success" : "failed") + " | " + code + " | " + message;
 		return new String[]{log};
 	}
 	

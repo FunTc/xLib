@@ -17,7 +17,7 @@ public class XApplication extends Application {
 	@Override
 	public void onCreate() {
 		super.onCreate();
-		registerActivityLifecycleCallbacks(new ActivityLifecycle());
+		registerActivityLifecycleCallbacks(new AppActivityLifecycle());
 		applicationContext = getApplicationContext();
 		Utils.init(this);
 		CrashHandler.getInstance().init(this);

@@ -40,10 +40,10 @@ public class SystemUtils {
 			json = json.trim();
 			if (json.startsWith("{")) {
 				JSONObject jsonObject = new JSONObject(json);
-				message = jsonObject.toString(4);
+				message = jsonObject.toString(3).replace("\\","");
 			} else if (json.startsWith("[")) {
 				JSONArray jsonArray = new JSONArray(json);
-				message = jsonArray.toString(4);
+				message = jsonArray.toString(3).replace("\\","");
 			} else {
 				message = json;
 			}

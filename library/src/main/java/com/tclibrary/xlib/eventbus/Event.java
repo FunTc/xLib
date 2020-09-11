@@ -2,6 +2,9 @@ package com.tclibrary.xlib.eventbus;
 
 import android.text.TextUtils;
 
+import com.google.gson.internal.$Gson$Types;
+
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -51,6 +54,10 @@ public class Event {
 	void setValues(Object... values){
 		mValues = values;
 	}
+	
+	public Object[] getValues() {
+		return mValues;
+	}
 
 	@SuppressWarnings("unchecked")
 	public <T> T getValue(int index){
@@ -69,7 +76,7 @@ public class Event {
 	}
 	
 	@SuppressWarnings("unchecked")
-	public <T> T findValue(Class<T> cls){
+	public <T> T findValue(@NonNull Class<T> cls){
 		if(mValues != null){
 			for(Object obj : mValues){
 				if(cls.isInstance(obj)){
@@ -81,19 +88,31 @@ public class Event {
 	}
 
 	@SuppressWarnings("unchecked")
-	public <T> T findValue(Class<T> cls, T defaultValue){
+	public <T> T findValue(@NonNull Class<T> cls, @NonNull T defaultValue){
 		T value = findValue(cls);
 		if (value != null) return value;
 		return defaultValue;
 	}
 
 	@SuppressWarnings("unchecked")
-	public <T> T findProcessedValue(Class<T> cls){
+	public <T> T findProcessedValue(@NonNull Class<T> cls){
 		if(mProcessedValues != null){
 			for(Object obj : mProcessedValues){
 				if(cls.isInstance(obj)){
 					return (T)obj;
 				}
+			}
+		}
+		return null;
+	}
+
+	@SuppressWarnings("unchecked")
+	public <T> T findProcessedValue(@NonNull Type typeOfT) {
+		Class<?> rawCls = $Gson$Types.getRawType(typeOfT);
+		if(mProcessedValues != null){
+			for(Object obj : mProcessedValues) {
+				if (obj.getClass() == rawCls || rawCls.isInstance(obj))
+					return (T) obj;
 			}
 		}
 		return null;

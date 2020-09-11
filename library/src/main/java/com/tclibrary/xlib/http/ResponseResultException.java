@@ -2,23 +2,12 @@ package com.tclibrary.xlib.http;
 
 /**
  * Created by FunTc on 2018/10/26.
+ * 接口返回数据异常
  */
-public class ResponseResultException extends Exception {
-	
-	private int code;
-	private String message;
+public class ResponseResultException extends XHttpException {
 	
 	public ResponseResultException(int code, String message){
-		this.code = code;
-		this.message = message;
+		super(code, message);
 	}
 	
-	public int getErrorCode(){
-		return code;
-	}
-
-	@Override
-	public String getMessage() {
-		return message;
-	}
 }

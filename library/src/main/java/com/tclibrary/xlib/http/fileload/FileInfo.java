@@ -1,10 +1,12 @@
 package com.tclibrary.xlib.http.fileload;
 
+import androidx.annotation.NonNull;
+
 /**
  * Created by FunTc on 2020/06/23.
  */
 public class FileInfo {
-    
+
     private String name;
     private String path;
     private String type;
@@ -43,4 +45,14 @@ public class FileInfo {
         this.size = size;
     }
 
+    @NonNull
+    @Override
+    public String toString() {
+        return "FileInfo{" +
+                "name='" + name + '\'' +
+                ", path='" + path + '\'' +
+                ", type='" + type + '\'' +
+                ", size=" + size +
+                '}';
+    }
 }

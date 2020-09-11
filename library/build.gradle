@@ -49,16 +49,16 @@ dependencies {
 
     api 'androidx.appcompat:appcompat:1.1.0'
 
-    api 'com.blankj:utilcodex:1.28.3'
+    api 'com.blankj:utilcodex:1.29.0'
     
     /* RxJava2 */
     api 'io.reactivex.rxjava2:rxjava:2.2.19'
     api 'io.reactivex.rxjava2:rxandroid:2.1.1'
 
     /* Retrofit */
-    api 'com.squareup.retrofit2:retrofit:2.8.1'
-    api 'com.squareup.retrofit2:converter-gson:2.8.1'
-    api 'com.squareup.retrofit2:adapter-rxjava2:2.8.1'
+    api 'com.squareup.retrofit2:retrofit:2.8.2'
+    api 'com.squareup.retrofit2:converter-gson:2.8.2'
+    api 'com.squareup.retrofit2:adapter-rxjava2:2.8.2'
     
     /* Fragmentation */
     api 'me.yokeyword:fragmentationx:1.0.2'

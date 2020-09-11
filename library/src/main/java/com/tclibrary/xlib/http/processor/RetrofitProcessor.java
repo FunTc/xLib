@@ -61,7 +61,7 @@ public class RetrofitProcessor extends BaseHttpProcessor {
 			List<Pair<String, Object>> pairParams = getPairsFromParams(requestParams.getParams());
 			if (mapParams.size() != 0 && pairParams.size() != 0 || pairParams.size() != 0) {
 				for (Pair<String, Object> pair : pairParams){
-					mapParams.put((String) pair.first, pair.second);
+					mapParams.put(pair.first, pair.second);
 				}
 				Method method = mApiClass.getMethod(mMethodName, Map.class);
 				mCallTask = (Call<?>) method.invoke(api, mapParams);

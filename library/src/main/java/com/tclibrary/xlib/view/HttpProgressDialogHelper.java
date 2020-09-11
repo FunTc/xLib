@@ -1,12 +1,13 @@
 package com.tclibrary.xlib.view;
 
+import android.content.Context;
 import android.os.Handler;
 import android.os.Looper;
 
 /**
  * Created by FunTc on 2018/10/29.
  */
-public class HttpProgressDialogHelper implements IProgressView {
+public class HttpProgressDialogHelper {
 
 	private static final class InstanceHolder {
 		private static final HttpProgressDialogHelper INSTANCE = new HttpProgressDialogHelper();
@@ -16,6 +17,7 @@ public class HttpProgressDialogHelper implements IProgressView {
 		return InstanceHolder.INSTANCE;
 	}
 
+	private final static long SHOW_TIMEOUT	=	20_000;
 	private IProgressView mIProgressView;
 	private Handler mMainHandler;
 	
@@ -28,55 +30,61 @@ public class HttpProgressDialogHelper implements IProgressView {
 		mIProgressView = progressView;
 	}
 
-	@Override
-	public void show() {
-		if (isMainThread()){
-			mIProgressView.show();
-		} else {
-			mMainHandler.post(new Runnable() {
-				@Override
-				public void run() {
-					mIProgressView.show();
-				}
-			});
-		}
+	public synchronized void show(long timeout) {
+		show(null, null, timeout);
 	}
 
-	@Override
-	public void show(final CharSequence msg) {
-		if (isMainThread()){
-			mIProgressView.show(msg);
-		} else {
-			mMainHandler.post(new Runnable() {
-				@Override
-				public void run() {
-					mIProgressView.show(msg);
-				}
-			});
-		}
+	public synchronized void show(Context context, long timeout) {
+		show(context, null, timeout);
+	} 
+	
+	public synchronized void show(final CharSequence msg, long timeout) {
+		show(null, msg, timeout);
 	}
 
-	@Override
+	public synchronized void show(Context context, final CharSequence msg, long timeout) {
+		if (isShowing()) dismiss();
+		if (isMainThread()){
+			mIProgressView.show(context, msg);
+		} else {
+			mMainHandler.post(() -> mIProgressView.show(msg));
+		}
+		mMainHandler.postDelayed(autoDismissRunnable, timeout);
+	}
+	
+	public synchronized void show() {
+		show(SHOW_TIMEOUT);
+	}
+	
+	public synchronized void show(Context context) {
+		show(context, SHOW_TIMEOUT);
+	}
+
+	public synchronized void show(final CharSequence msg) {
+		show(msg, SHOW_TIMEOUT);
+	}
+
+	public synchronized void show(Context context, final CharSequence msg) {
+		show(context, msg, SHOW_TIMEOUT);
+	}
+
 	public boolean isShowing() {
 		return mIProgressView.isShowing();
 	}
 
-	@Override
-	public void dismiss() {
+	public synchronized void dismiss() {
+		mMainHandler.removeCallbacks(autoDismissRunnable);
 		if (isMainThread()){
 			mIProgressView.dismiss();
 		} else {
-			mMainHandler.post(new Runnable() {
-				@Override
-				public void run() {
-					mIProgressView.dismiss();
-				}
-			});
+			mMainHandler.post(() -> mIProgressView.dismiss());
 		}
 	}
 
 	private boolean isMainThread(){
 		return Looper.getMainLooper().getThread() == Thread.currentThread();
 	}
+	
+	private Runnable autoDismissRunnable = this::dismiss;
 
 }

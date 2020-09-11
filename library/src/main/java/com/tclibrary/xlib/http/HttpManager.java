@@ -149,8 +149,9 @@ public class HttpManager {
 		return new ObservableTransformer<T, T>() {
 			@Override
 			public ObservableSource<T> apply(Observable<T> upstream) {
-				return upstream.subscribeOn(Schedulers.io()).unsubscribeOn(Schedulers.io())
-						.subscribeOn(AndroidSchedulers.mainThread()).observeOn(AndroidSchedulers.mainThread());
+				return upstream.subscribeOn(Schedulers.io())
+						.unsubscribeOn(Schedulers.io())
+						.observeOn(AndroidSchedulers.mainThread());
 			}
 		};
 	}
