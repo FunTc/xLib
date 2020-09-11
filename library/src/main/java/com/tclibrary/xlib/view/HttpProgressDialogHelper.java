@@ -1,5 +1,6 @@
 package com.tclibrary.xlib.view;
 
+import android.content.Context;
 import android.os.Handler;
 import android.os.Looper;
 
@@ -29,32 +30,50 @@ public class HttpProgressDialogHelper {
 		mIProgressView = progressView;
 	}
 
-	public void show(long timeout) {
-		show(null, timeout);
+	public synchronized void show(long timeout) {
+		show(null, null, timeout);
 	}
+
+	public synchronized void show(Context context, long timeout) {
+		show(context, null, timeout);
+	} 
 	
-	public void show(final CharSequence msg, long timeout) {
+	public synchronized void show(final CharSequence msg, long timeout) {
+		show(null, msg, timeout);
+	}
+
+	public synchronized void show(Context context, final CharSequence msg, long timeout) {
+		if (isShowing()) dismiss();
 		if (isMainThread()){
-			mIProgressView.show(msg);
+			mIProgressView.show(context, msg);
 		} else {
 			mMainHandler.post(() -> mIProgressView.show(msg));
 		}
-		mMainHandler.postDelayed(this::dismiss, timeout);
+		mMainHandler.postDelayed(autoDismissRunnable, timeout);
 	}
 	
-	public void show() {
+	public synchronized void show() {
 		show(SHOW_TIMEOUT);
 	}
+	
+	public synchronized void show(Context context) {
+		show(context, SHOW_TIMEOUT);
+	}
 
-	public void show(final CharSequence msg) {
+	public synchronized void show(final CharSequence msg) {
 		show(msg, SHOW_TIMEOUT);
+	}
+
+	public synchronized void show(Context context, final CharSequence msg) {
+		show(context, msg, SHOW_TIMEOUT);
 	}
 
 	public boolean isShowing() {
 		return mIProgressView.isShowing();
 	}
 
-	public void dismiss() {
+	public synchronized void dismiss() {
+		mMainHandler.removeCallbacks(autoDismissRunnable);
 		if (isMainThread()){
 			mIProgressView.dismiss();
 		} else {
@@ -65,5 +84,7 @@ public class HttpProgressDialogHelper {
 	private boolean isMainThread(){
 		return Looper.getMainLooper().getThread() == Thread.currentThread();
 	}
+	
+	private Runnable autoDismissRunnable = this::dismiss;
 
 }

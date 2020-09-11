@@ -6,6 +6,7 @@ import com.google.gson.JsonParser;
 import com.tclibrary.xlib.eventbus.Event;
 import com.tclibrary.xlib.http.HttpManager;
 import com.tclibrary.xlib.http.IResult;
+import com.tclibrary.xlib.http.XHttpException;
 
 import java.io.IOException;
 import java.lang.reflect.Type;
@@ -64,6 +65,8 @@ public class OkHttpProcessor extends BaseHttpProcessor {
             event.setIsSuccess(false);
         } else if (response.isSuccessful()) {
             handleResult(event, response.body().string());
+        } else {
+            throw new XHttpException(response.code(), response.message());
         }
     }
     

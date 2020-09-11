@@ -66,16 +66,16 @@ public class EventBus {
 	private void processEventInternal(Event event, @NonNull EventProcessor processor, ThreadMode observerThreadMode) {
 		try {
 			processor.onProcess(event);
-			mTag2FutureTaskMap.remove(event.getEventTag());
-			if (event.isCanceled()) {
-				event.setIsPosting(false);
-			} else {
-				dispatchEvent(event, observerThreadMode);
-			}
 		} catch (Exception e) {
-			event.setIsPosting(false);
+			event.setIsSuccess(false);
 			event.setException(e);
 			e.printStackTrace();
+		}
+		mTag2FutureTaskMap.remove(event.getEventTag());
+		if (event.isCanceled()) {
+			event.setIsPosting(false);
+		} else {
+			dispatchEvent(event, observerThreadMode);
 		}
 	}
 	
@@ -98,16 +98,17 @@ public class EventBus {
 	
 	private void dispatchEventInternal(Event event) {
 		List<EventListenerWrapper> listenerWrappers = mTag2ListenersMap.get(event.getEventTag());
-		if (listenerWrappers == null || listenerWrappers.size() == 0) return;
-		for (EventListenerWrapper listenerWrapper : listenerWrappers) {
-			if (listenerWrapper.isJustNotifyInActive()) {
-				if (listenerWrapper.isActive()) {
+		if (listenerWrappers != null && listenerWrappers.size() != 0) {
+			for (EventListenerWrapper listenerWrapper : listenerWrappers) {
+				if (listenerWrapper.isJustNotifyInActive()) {
+					if (listenerWrapper.isActive()) {
+						listenerWrapper.getListener().onEventResult(event);
+					}
+				} else {
 					listenerWrapper.getListener().onEventResult(event);
-				} 
-			} else {
-				listenerWrapper.getListener().onEventResult(event);
+				}
 			}
-		}
+		} 
 		event.setIsPosting(false);
 		mTag2FutureTaskMap.remove(event.getEventTag());
 	}
