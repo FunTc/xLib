@@ -19,27 +19,27 @@ import androidx.annotation.NonNull;
  */
 public class ProgressDialog extends Dialog {
 
-	private TextView mTvMsg;
-	
-	public ProgressDialog(@NonNull Context context) {
-		super(context);
-		setContentView(R.layout.view_progress);
-		mTvMsg = findViewById(R.id.tv);
-		Window window = getWindow();
-		if (window != null){
-			window.setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-			WindowManager.LayoutParams params = window.getAttributes();
-			params.dimAmount = 0;
-			window.setAttributes(params);
-		}
-		setCanceledOnTouchOutside(false);
-	}
-	
-	public void setMessage(CharSequence msg){
-		if (!TextUtils.isEmpty(msg)){
-			mTvMsg.setText(msg);
-			mTvMsg.setVisibility(View.VISIBLE);
-		}
-	}
-	
+    private TextView mTvMsg;
+
+    public ProgressDialog(@NonNull Context context) {
+        super(context);
+        setContentView(R.layout.view_progress);
+        mTvMsg = findViewById(R.id.tv);
+        Window window = getWindow();
+        if (window != null){
+            window.setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+            WindowManager.LayoutParams params = window.getAttributes();
+            params.dimAmount = 0;
+            window.setAttributes(params);
+        }
+        setCanceledOnTouchOutside(false);
+    }
+
+    public void setMessage(CharSequence msg){
+        if (!TextUtils.isEmpty(msg)){
+            mTvMsg.setText(msg);
+            mTvMsg.setVisibility(View.VISIBLE);
+        }
+    }
+
 }

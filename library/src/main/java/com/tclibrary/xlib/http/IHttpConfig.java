@@ -10,8 +10,8 @@ import retrofit2.Retrofit;
  */
 public interface IHttpConfig {
 
-	void onOkHttpClientConfig(@NonNull OkHttpClient.Builder builder);
+    void onOkHttpClientConfig(@NonNull OkHttpClient.Builder builder);
 
-	void onRetrofitConfig(@NonNull Retrofit.Builder builder);
-	
+    void onRetrofitConfig(@NonNull Retrofit.Builder builder);
+
 }

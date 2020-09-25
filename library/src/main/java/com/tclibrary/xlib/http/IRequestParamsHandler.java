@@ -9,8 +9,8 @@ import androidx.annotation.NonNull;
  */
 public interface IRequestParamsHandler {
 
-	@NonNull Map<String, String> getCommonParams();
+    @NonNull Map<String, String> getCommonParams();
 
-	void handleParams(@NonNull Map<String, String> params);
-	
+    void handleParams(@NonNull Map<String, String> params);
+
 }

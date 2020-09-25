@@ -10,50 +10,50 @@ import com.tclibrary.xlib.AppManager;
  */
 public class DefaultHttpProgressViewHolder implements IProgressView {
 
-	private ProgressDialog mDialog;
-	
-	
-	@Override
-	public void show() {
-		show(null, null);
-	}
+    private ProgressDialog mDialog;
 
-	@Override
-	public void show(Context context) {
-		show(context, null);
-	}
 
-	@Override
-	public void show(final CharSequence msg) {
-		show(null, msg);
-	}
+    @Override
+    public void show() {
+        show(null, null);
+    }
 
-	@Override
-	public void show(Context context, CharSequence msg) {
-		if (isShowing()) dismiss();
-		if (context == null) {
-			context = AppManager.instance().getTopActivity();
-		}
-		mDialog = new ProgressDialog(context);
-		mDialog.setMessage(msg);
-		mDialog.show();
-	}
+    @Override
+    public void show(Context context) {
+        show(context, null);
+    }
 
-	@Override
-	public boolean isShowing() {
-		return mDialog != null && mDialog.isShowing();
-	}
+    @Override
+    public void show(final CharSequence msg) {
+        show(null, msg);
+    }
 
-	@Override
-	public void dismiss() {
-		if (isShowing()) {
-			Context context = mDialog.getContext();
-			if (context instanceof Activity && ((Activity) context).isDestroyed()) {
-				return;
-			}
-			mDialog.dismiss();
-		}
-		mDialog = null;
-	}
-	
+    @Override
+    public void show(Context context, CharSequence msg) {
+        if (isShowing()) dismiss();
+        if (context == null) {
+            context = AppManager.instance().getTopActivity();
+        }
+        mDialog = new ProgressDialog(context);
+        mDialog.setMessage(msg);
+        mDialog.show();
+    }
+
+    @Override
+    public boolean isShowing() {
+        return mDialog != null && mDialog.isShowing();
+    }
+
+    @Override
+    public void dismiss() {
+        if (isShowing()) {
+            Context context = mDialog.getContext();
+            if (context instanceof Activity && ((Activity) context).isDestroyed()) {
+                return;
+            }
+            mDialog.dismiss();
+        }
+        mDialog = null;
+    }
+
 }

@@ -7,21 +7,21 @@ import com.tclibrary.xlib.view.HttpProgressDialogHelper;
  */
 public abstract class ProgressResponseResultObserver<T> extends ResponseResultObserver<T> {
 
-	private String message;
-	
-	public ProgressResponseResultObserver(){ }
+    private String message;
 
-	public ProgressResponseResultObserver(String msg){
-		message = msg;
-	}
-	
-	@Override
-	protected void onStartRequest() {
-		HttpProgressDialogHelper.instance().show(message);
-	}
+    public ProgressResponseResultObserver(){ }
 
-	@Override
-	protected void onEndRequest() {
-		HttpProgressDialogHelper.instance().dismiss();
-	}
+    public ProgressResponseResultObserver(String msg){
+        message = msg;
+    }
+
+    @Override
+    protected void onStartRequest() {
+        HttpProgressDialogHelper.instance().show(message);
+    }
+
+    @Override
+    protected void onEndRequest() {
+        HttpProgressDialogHelper.instance().dismiss();
+    }
 }

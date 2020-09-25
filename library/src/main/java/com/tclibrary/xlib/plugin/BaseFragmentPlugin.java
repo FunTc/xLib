@@ -14,35 +14,35 @@ import androidx.lifecycle.LifecycleOwner;
  * Created by FunTc on 2018/11/5.
  */
 public abstract class BaseFragmentPlugin extends LifecycleObserverPlugin implements LifecycleOwner {
-	
-	protected Fragment mFragment;
-	
-	public void onAttachFragment(@NonNull Fragment fragment){
-		mFragment = fragment;
-	}
 
-	public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState){}
-	
-	public void onActivityCreated(@Nullable Bundle savedInstanceState){}
+    protected Fragment mFragment;
 
-	public void onDestroyView(){}
+    public void onAttachFragment(@NonNull Fragment fragment){
+        mFragment = fragment;
+    }
 
-	public void onDetach(){}
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState){}
 
-	public void onSaveInstanceState(Bundle outState) { }
+    public void onActivityCreated(@Nullable Bundle savedInstanceState){}
 
-	public void onViewStateRestored(Bundle savedInstanceState) { }
+    public void onDestroyView(){}
 
-	public void onActivityResult(int requestCode, int resultCode, Intent data) { }
+    public void onDetach(){}
 
-	public boolean onBackPressed() {
-		return false;
-	}
+    public void onSaveInstanceState(Bundle outState) { }
 
-	@NonNull
-	@Override
-	public Lifecycle getLifecycle() {
-		return mFragment.getLifecycle();
-	}
+    public void onViewStateRestored(Bundle savedInstanceState) { }
+
+    public void onActivityResult(int requestCode, int resultCode, Intent data) { }
+
+    public boolean onBackPressed() {
+        return false;
+    }
+
+    @NonNull
+    @Override
+    public Lifecycle getLifecycle() {
+        return mFragment.getLifecycle();
+    }
 
 }

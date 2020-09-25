@@ -14,31 +14,31 @@ import androidx.lifecycle.LifecycleOwner;
  */
 public abstract class BaseActivityPlugin extends LifecycleObserverPlugin implements LifecycleOwner {
 
-	protected AppCompatActivity mActivity;
-	
-	public void onAttachActivity(AppCompatActivity activity){
-		mActivity = activity;
-	}
-	
-	public void onPostCreate(Bundle savedInstanceState){ }
+    protected AppCompatActivity mActivity;
 
-	public void onSaveInstanceState(Bundle outState) { }
+    public void onAttachActivity(AppCompatActivity activity){
+        mActivity = activity;
+    }
 
-	public void onRestoreInstanceState(Bundle savedInstanceState) { }
+    public void onPostCreate(Bundle savedInstanceState){ }
 
-	public void onActivityResult(int requestCode, int resultCode, Intent data) { }
+    public void onSaveInstanceState(Bundle outState) { }
 
-	public boolean dispatchTouchEvent(MotionEvent ev) {
-		return false;
-	}
+    public void onRestoreInstanceState(Bundle savedInstanceState) { }
 
-	public boolean onBackPressed() {
-		return false;
-	}
+    public void onActivityResult(int requestCode, int resultCode, Intent data) { }
 
-	@NonNull
-	@Override
-	public Lifecycle getLifecycle() {
-		return mActivity.getLifecycle();
-	}
+    public boolean dispatchTouchEvent(MotionEvent ev) {
+        return false;
+    }
+
+    public boolean onBackPressed() {
+        return false;
+    }
+
+    @NonNull
+    @Override
+    public Lifecycle getLifecycle() {
+        return mActivity.getLifecycle();
+    }
 }

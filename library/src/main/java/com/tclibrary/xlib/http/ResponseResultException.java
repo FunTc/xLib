@@ -5,9 +5,9 @@ package com.tclibrary.xlib.http;
  * 接口返回数据异常
  */
 public class ResponseResultException extends XHttpException {
-	
-	public ResponseResultException(int code, String message){
-		super(code, message);
-	}
-	
+
+    public ResponseResultException(int code, String message){
+        super(code, message);
+    }
+
 }

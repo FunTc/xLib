@@ -7,10 +7,10 @@ import androidx.annotation.NonNull;
  */
 public interface EventRegister {
 
-	EventRegister setEventProcessor(@NonNull EventProcessor processor);
-	EventRegister addEventListener(@NonNull OnEventListener listener);
-	EventRegister addEventListener(@NonNull OnEventListener listener, boolean notifyInActive);
-	void register(Object object);
-	EventPoster registerAt(Object object);
-	
+    EventRegister setEventProcessor(@NonNull EventProcessor processor);
+    EventRegister addEventListener(@NonNull OnEventListener listener);
+    EventRegister addEventListener(@NonNull OnEventListener listener, boolean notifyInActive);
+    void register(Object object);
+    EventPoster registerAt(Object object);
+
 }
