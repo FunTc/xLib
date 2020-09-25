@@ -31,7 +31,7 @@ public abstract class AbsBaseActivity extends AppCompatActivity implements ITool
 		
 		if (getLayoutView() != null) {
 			setContentView(getLayoutView());
-		} else {
+		} else if (getLayoutViewId() != 0) {
 			setContentView(getLayoutViewId());
 		}
 		

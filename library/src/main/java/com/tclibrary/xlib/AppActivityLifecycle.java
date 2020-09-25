@@ -5,6 +5,7 @@ import android.app.Application;
 import android.os.Bundle;
 
 import com.tclibrary.xlib.eventbus.EventBus;
+import com.tclibrary.xlib.view.HttpProgressDialogHelper;
 
 import androidx.annotation.NonNull;
 
@@ -58,6 +59,7 @@ public class AppActivityLifecycle implements Application.ActivityLifecycleCallba
 
 	@Override
 	public void onActivityDestroyed(@NonNull Activity activity) {
+		HttpProgressDialogHelper.instance().dismiss();
 		AppManager.instance().removeActivity(activity);
 	}
 }

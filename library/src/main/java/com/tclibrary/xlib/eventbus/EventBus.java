@@ -100,12 +100,14 @@ public class EventBus {
 		List<EventListenerWrapper> listenerWrappers = mTag2ListenersMap.get(event.getEventTag());
 		if (listenerWrappers != null && listenerWrappers.size() != 0) {
 			for (EventListenerWrapper listenerWrapper : listenerWrappers) {
-				if (listenerWrapper.isJustNotifyInActive()) {
-					if (listenerWrapper.isActive()) {
+				if (listenerWrapper.getListener() != null) {
+					if (listenerWrapper.isJustNotifyInActive()) {
+						if (listenerWrapper.isActive()) {
+							listenerWrapper.getListener().onEventResult(event);
+						}
+					} else {
 						listenerWrapper.getListener().onEventResult(event);
 					}
-				} else {
-					listenerWrapper.getListener().onEventResult(event);
 				}
 			}
 		} 
