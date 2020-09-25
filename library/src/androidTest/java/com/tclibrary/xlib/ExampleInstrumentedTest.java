@@ -17,14 +17,14 @@ import static org.junit.Assert.assertEquals;
  */
 @RunWith(AndroidJUnit4.class)
 public class ExampleInstrumentedTest {
-	
-	@Test
-	public void useAppContext() throws Exception {
-		// Context of the app under test.
-		Context appContext = ApplicationProvider.getApplicationContext();
 
-		assertEquals("com.tclibrary.xlib.test", appContext.getPackageName());
-	}
+    @Test
+    public void useAppContext() throws Exception {
+        // Context of the app under test.
+        Context appContext = ApplicationProvider.getApplicationContext();
 
-	
+        assertEquals("com.tclibrary.xlib.test", appContext.getPackageName());
+    }
+
+
 }

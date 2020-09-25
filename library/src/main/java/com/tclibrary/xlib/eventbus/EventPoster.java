@@ -5,10 +5,10 @@ package com.tclibrary.xlib.eventbus;
  */
 public interface EventPoster {
 
-	EventPoster setValues(Object... values);
-	EventPoster delay(long delay);
-	void post();
-	void postTo(ThreadMode mode);
-	
-	
+    EventPoster setValues(Object... values);
+    EventPoster delay(long delay);
+    void post();
+    void postTo(ThreadMode mode);
+
+
 }

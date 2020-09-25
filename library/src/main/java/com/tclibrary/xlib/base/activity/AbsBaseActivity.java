@@ -19,102 +19,102 @@ import androidx.appcompat.app.AppCompatActivity;
  * Created by FunTc on 2018/7/27.
  */
 public abstract class AbsBaseActivity extends AppCompatActivity implements IToolbarHolder {
-	
-	private ActivityPluginHandler mPluginHandler;
-	protected IToolbar mIToolbar;
-	
-	@Override
-	protected void onCreate(@Nullable Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
-		mPluginHandler = new ActivityPluginHandler();
-		preSetContentView();
-		
-		if (getLayoutView() != null) {
-			setContentView(getLayoutView());
-		} else if (getLayoutViewId() != 0) {
-			setContentView(getLayoutViewId());
-		}
-		
-		mIToolbar = createToolbar();
-	}
-	
-	@Override
-	public void onToolbarConfig(@NonNull ToolbarConfig config) {}
 
-	@Override
-	public void onTitleRightBtnClick(@NonNull View v) {}
+    private ActivityPluginHandler mPluginHandler;
+    protected IToolbar mIToolbar;
 
-	@Override
-	public void onCloseBtnClick(@NonNull View v) {}
+    @Override
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        mPluginHandler = new ActivityPluginHandler();
+        preSetContentView();
 
-	@NonNull
-	@Override
-	public IToolbar createToolbar() {
-		return new DefaultToolbar(this);
-	}
+        if (getLayoutView() != null) {
+            setContentView(getLayoutView());
+        } else if (getLayoutViewId() != 0) {
+            setContentView(getLayoutViewId());
+        }
 
-	protected int getLayoutViewId() {
-		return 0;
-	}
+        mIToolbar = createToolbar();
+    }
 
-	protected View getLayoutView() {
-		return null;
-	}
+    @Override
+    public void onToolbarConfig(@NonNull ToolbarConfig config) {}
 
-	protected void preSetContentView() {}
+    @Override
+    public void onTitleRightBtnClick(@NonNull View v) {}
 
-	protected void addPlugin(@NonNull BaseActivityPlugin plugin){
-		getLifecycle().addObserver(plugin);
-		plugin.onAttachActivity(this);
-		mPluginHandler.addPlugin(plugin);
-		
-	}
+    @Override
+    public void onCloseBtnClick(@NonNull View v) {}
 
-	@Override
-	protected void onDestroy() {
-		/* LifecycleObserver中的destroy总会先于Activity中的onDestroy */
-		mPluginHandler.clear();
-		mPluginHandler = null;
-		super.onDestroy();
-	}
-	
-	@Override
-	protected void onPostCreate(@Nullable Bundle savedInstanceState) {
-		super.onPostCreate(savedInstanceState);
-		mPluginHandler.onPostCreate(savedInstanceState);
-	}
+    @NonNull
+    @Override
+    public IToolbar createToolbar() {
+        return new DefaultToolbar(this);
+    }
 
-	@Override
-	protected void onSaveInstanceState(@NonNull Bundle outState) {
-		super.onSaveInstanceState(outState);
-		mPluginHandler.onSaveInstanceState(outState);
-	}
+    protected int getLayoutViewId() {
+        return 0;
+    }
 
-	@Override
-	protected void onRestoreInstanceState(@NonNull Bundle savedInstanceState) {
-		super.onRestoreInstanceState(savedInstanceState);
-		mPluginHandler.onRestoreInstanceState(savedInstanceState);
-	}
+    protected View getLayoutView() {
+        return null;
+    }
 
-	@Override
-	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-		super.onActivityResult(requestCode, resultCode, data);
-		mPluginHandler.onActivityResult(requestCode, resultCode, data);
-	}
+    protected void preSetContentView() {}
 
-	@Override
-	public boolean dispatchTouchEvent(MotionEvent ev) {
-		if (mPluginHandler.dispatchTouchEvent(ev)) {
-			return true;
-		}
-		return super.dispatchTouchEvent(ev);
-	}
+    protected void addPlugin(@NonNull BaseActivityPlugin plugin){
+        getLifecycle().addObserver(plugin);
+        plugin.onAttachActivity(this);
+        mPluginHandler.addPlugin(plugin);
 
-	@Override
-	public void onBackPressed() {
-		if (mPluginHandler.onBackPressed()){
-			return;	
-		}
-		super.onBackPressed();
-	}
+    }
+
+    @Override
+    protected void onDestroy() {
+        /* LifecycleObserver中的destroy总会先于Activity中的onDestroy */
+        mPluginHandler.clear();
+        mPluginHandler = null;
+        super.onDestroy();
+    }
+
+    @Override
+    protected void onPostCreate(@Nullable Bundle savedInstanceState) {
+        super.onPostCreate(savedInstanceState);
+        mPluginHandler.onPostCreate(savedInstanceState);
+    }
+
+    @Override
+    protected void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+        mPluginHandler.onSaveInstanceState(outState);
+    }
+
+    @Override
+    protected void onRestoreInstanceState(@NonNull Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+        mPluginHandler.onRestoreInstanceState(savedInstanceState);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        mPluginHandler.onActivityResult(requestCode, resultCode, data);
+    }
+
+    @Override
+    public boolean dispatchTouchEvent(MotionEvent ev) {
+        if (mPluginHandler.dispatchTouchEvent(ev)) {
+            return true;
+        }
+        return super.dispatchTouchEvent(ev);
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (mPluginHandler.onBackPressed()){
+            return;
+        }
+        super.onBackPressed();
+    }
 }

@@ -14,7 +14,7 @@ import retrofit2.Response;
 
 /**
  * Created by FunTc on 2018/11/2.
- * 
+ *
  * <p>最多可传递3个参数：
  * <pre>
  * (1).需要传给服务器的参数 {@link RequestParams}；
@@ -34,68 +34,68 @@ import retrofit2.Response;
  * 	</pre>
  */
 public class RetrofitProcessor extends BaseHttpProcessor {
-	
-	private Class<?> mApiClass;
-	private String mMethodName;
-	private Call<?> mCallTask;
-	private boolean isCanceled;
 
-	/**
-	 * @param apiClass API接口类
-	 * @param methodName 需要调用的方法名
-	 */
-	public RetrofitProcessor(@NonNull Class<?> apiClass, @NonNull String methodName){
-		mApiClass = apiClass;
-		mMethodName = methodName;
-	}
-	
-	@Override
-	protected void onProcessInternal(@NonNull Event event) throws Exception {
-		RequestParams requestParams = event.findValue(RequestParams.class);
-		Object api = HttpManager.instance().getRetrofitService(mApiClass);
-		if (requestParams == null){
-			Method method = mApiClass.getMethod(mMethodName);
-			mCallTask = (Call<?>) method.invoke(api);
-		} else {
-			Map<String, Object> mapParams = getMapFromParams(requestParams.getParams());
-			List<Pair<String, Object>> pairParams = getPairsFromParams(requestParams.getParams());
-			if (mapParams.size() != 0 && pairParams.size() != 0 || pairParams.size() != 0) {
-				for (Pair<String, Object> pair : pairParams){
-					mapParams.put(pair.first, pair.second);
-				}
-				Method method = mApiClass.getMethod(mMethodName, Map.class);
-				mCallTask = (Call<?>) method.invoke(api, mapParams);
-			} else if (mapParams.size() != 0 ) {
-				Method method = mApiClass.getMethod(mMethodName, Map.class);
-				mCallTask = (Call<?>) method.invoke(api, mapParams);
-			} else {
-				Class<?>[] classType = new Class[requestParams.getParams().length];
-				for (int i = 0; i < requestParams.getParams().length; i++){
-					classType[i] = requestParams.getParam(i).getClass();
-				}
-				Method method = mApiClass.getMethod(mMethodName, classType);
-				mCallTask = (Call<?>) method.invoke(api, requestParams.getParams());
-			}
-		}
-		if (mCallTask == null) {
-			event.setIsSuccess(false);
-			return;
-		}
-		Response<?> response = mCallTask.execute();
-		if (isCanceled) {
-			event.setIsSuccess(false);
-		} else {
-			event.setIsSuccess(response.isSuccessful());
-			event.addProcessedValue(response.body());
-		}
-	}
+    private Class<?> mApiClass;
+    private String mMethodName;
+    private Call<?> mCallTask;
+    private boolean isCanceled;
 
-	@Override
-	public void cancel(boolean mayInterruptIfRunning) {
-		isCanceled = true;
-		if (mayInterruptIfRunning && mCallTask != null) {
-			mCallTask.cancel();
-		}
-	}
+    /**
+     * @param apiClass API接口类
+     * @param methodName 需要调用的方法名
+     */
+    public RetrofitProcessor(@NonNull Class<?> apiClass, @NonNull String methodName){
+        mApiClass = apiClass;
+        mMethodName = methodName;
+    }
+
+    @Override
+    protected void onProcessInternal(@NonNull Event event) throws Exception {
+        RequestParams requestParams = event.findValue(RequestParams.class);
+        Object api = HttpManager.instance().getRetrofitService(mApiClass);
+        if (requestParams == null){
+            Method method = mApiClass.getMethod(mMethodName);
+            mCallTask = (Call<?>) method.invoke(api);
+        } else {
+            Map<String, Object> mapParams = getMapFromParams(requestParams.getParams());
+            List<Pair<String, Object>> pairParams = getPairsFromParams(requestParams.getParams());
+            if (mapParams.size() != 0 && pairParams.size() != 0 || pairParams.size() != 0) {
+                for (Pair<String, Object> pair : pairParams){
+                    mapParams.put(pair.first, pair.second);
+                }
+                Method method = mApiClass.getMethod(mMethodName, Map.class);
+                mCallTask = (Call<?>) method.invoke(api, mapParams);
+            } else if (mapParams.size() != 0 ) {
+                Method method = mApiClass.getMethod(mMethodName, Map.class);
+                mCallTask = (Call<?>) method.invoke(api, mapParams);
+            } else {
+                Class<?>[] classType = new Class[requestParams.getParams().length];
+                for (int i = 0; i < requestParams.getParams().length; i++){
+                    classType[i] = requestParams.getParam(i).getClass();
+                }
+                Method method = mApiClass.getMethod(mMethodName, classType);
+                mCallTask = (Call<?>) method.invoke(api, requestParams.getParams());
+            }
+        }
+        if (mCallTask == null) {
+            event.setIsSuccess(false);
+            return;
+        }
+        Response<?> response = mCallTask.execute();
+        if (isCanceled) {
+            event.setIsSuccess(false);
+        } else {
+            event.setIsSuccess(response.isSuccessful());
+            event.addProcessedValue(response.body());
+        }
+    }
+
+    @Override
+    public void cancel(boolean mayInterruptIfRunning) {
+        isCanceled = true;
+        if (mayInterruptIfRunning && mCallTask != null) {
+            mCallTask.cancel();
+        }
+    }
 
 }
