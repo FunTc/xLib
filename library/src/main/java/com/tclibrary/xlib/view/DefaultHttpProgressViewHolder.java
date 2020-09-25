@@ -1,5 +1,6 @@
 package com.tclibrary.xlib.view;
 
+import android.app.Activity;
 import android.content.Context;
 
 import com.tclibrary.xlib.AppManager;
@@ -46,6 +47,10 @@ public class DefaultHttpProgressViewHolder implements IProgressView {
 	@Override
 	public void dismiss() {
 		if (isShowing()) {
+			Context context = mDialog.getContext();
+			if (context instanceof Activity && ((Activity) context).isDestroyed()) {
+				return;
+			}
 			mDialog.dismiss();
 		}
 		mDialog = null;
